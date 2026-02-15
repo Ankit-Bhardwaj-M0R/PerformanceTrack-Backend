@@ -1,6 +1,5 @@
-package com.project.performanceTrack.enums;
+package com.project.coreservice.enums;
 
-// User role types in the system
 public enum UserRole {
     ADMIN,
     MANAGER,

@@ -1,6 +1,6 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
-import com.project.performanceTrack.enums.ReviewCycleStatus;
+import com.project.coreservice.enums.ReviewCycleStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

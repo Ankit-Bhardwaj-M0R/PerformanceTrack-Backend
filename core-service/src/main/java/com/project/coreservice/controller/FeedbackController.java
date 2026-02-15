@@ -1,9 +1,10 @@
-package com.project.performanceTrack.controller;
+package com.project.coreservice.controller;
 
-import com.project.performanceTrack.dto.ApiResponse;
-import com.project.performanceTrack.dto.FeedbackRequest;
-import com.project.performanceTrack.dto.FeedbackResponseDTO;
-import com.project.performanceTrack.service.FeedbackService;
+
+import com.project.coreservice.dto.ApiResponse;
+import com.project.coreservice.dto.FeedbackRequest;
+import com.project.coreservice.dto.FeedbackResponseDTO;
+import com.project.coreservice.service.FeedbackService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 

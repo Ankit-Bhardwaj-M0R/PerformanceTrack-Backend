@@ -1,4 +1,4 @@
-package com.project.performanceTrack.aspect;
+package com.project.coreservice.aspect;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

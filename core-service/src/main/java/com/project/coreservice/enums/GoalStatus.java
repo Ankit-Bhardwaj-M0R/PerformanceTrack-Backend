@@ -1,4 +1,4 @@
-package com.project.performanceTrack.enums;
+package com.project.coreservice.enums;
 
 public enum GoalStatus {
     PENDING,

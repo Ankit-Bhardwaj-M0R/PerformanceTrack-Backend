@@ -1,4 +1,4 @@
-package com.project.performanceTrack.config;
+package com.project.coreservice.config;
 
 import com.project.performanceTrack.dto.FeedbackRequest;
 import com.project.performanceTrack.dto.FeedbackResponseDTO;

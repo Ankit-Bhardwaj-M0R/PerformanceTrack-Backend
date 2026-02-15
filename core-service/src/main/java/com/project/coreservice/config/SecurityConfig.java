@@ -1,7 +1,7 @@
-package com.project.performanceTrack.config;
-
-import com.project.performanceTrack.security.JwtAuthFilter;
-import com.project.performanceTrack.security.RateLimitFilter;        // <-- new import
+package com.project.coreservice.config;
+ // <-- new import
+import com.project.coreservice.security.JwtAuthFilter;
+import com.project.coreservice.security.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +34,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/api/v1/review-cycles/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

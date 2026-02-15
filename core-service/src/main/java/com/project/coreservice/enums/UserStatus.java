@@ -1,6 +1,5 @@
-package com.project.performanceTrack.enums;
+package com.project.coreservice.enums;
 
-// User account status
 public enum UserStatus {
     ACTIVE,
     INACTIVE

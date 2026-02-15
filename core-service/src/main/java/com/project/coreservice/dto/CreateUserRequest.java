@@ -1,7 +1,7 @@
-package com.project.performanceTrack.dto;
+package com.project.coreservice.dto;
 
-import com.project.performanceTrack.enums.UserRole;
-import com.project.performanceTrack.enums.UserStatus;
+import com.project.coreservice.enums.UserRole;
+import com.project.coreservice.enums.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

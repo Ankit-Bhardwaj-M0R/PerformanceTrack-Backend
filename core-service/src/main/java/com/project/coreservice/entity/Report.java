@@ -1,4 +1,4 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,9 +33,8 @@ public class Report {
     private String format;
 
 
-    @ManyToOne
-    @JoinColumn(name = "generated_by")
-    private User generatedBy;
+    @Column(name = "generated_by")
+    private Integer generatedByUserId;
 
 
     @Column(name = "generated_date", nullable = false)

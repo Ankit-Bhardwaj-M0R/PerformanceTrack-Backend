@@ -1,4 +1,4 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

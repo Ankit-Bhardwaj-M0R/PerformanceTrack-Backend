@@ -1,4 +1,4 @@
-package com.project.performanceTrack.security;
+package com.project.coreservice.security;
 
 import com.project.performanceTrack.util.JwtUtil;
 import jakarta.servlet.FilterChain;

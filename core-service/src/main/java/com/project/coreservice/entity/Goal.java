@@ -1,5 +1,6 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
+import com.project.coreservice.enums.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -38,13 +39,11 @@ public class Goal {
     @Column(length = 20)
     private GoalPriority priority;
 
-    @ManyToOne
-    @JoinColumn(name = "assigned_to_user_id", nullable = false)
-    private User assignedToUser;
+    @Column(name = "assigned_to_user_id", nullable = false)
+    private Integer assignedToUserId;
 
-    @ManyToOne
-    @JoinColumn(name = "assigned_manager_id", nullable = false)
-    private User assignedManager;
+    @Column(name = "assigned_manager_id", nullable = false)
+    private Integer assignedManagerId;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -57,9 +56,8 @@ public class Goal {
     private GoalStatus status = GoalStatus.PENDING;
 
     // --- PHASE 3: INITIAL APPROVAL WORKFLOW (Manager Action) ---
-    @ManyToOne
-    @JoinColumn(name = "approved_by")
-    private User approvedBy;
+    @Column(name = "approved_by")
+    private Integer approvedByUserId;
 
     @Column(name = "approved_date")
     private LocalDateTime approvedDate;
@@ -67,9 +65,8 @@ public class Goal {
     @Column(name = "request_changes")
     private Boolean requestChanges = false;
 
-    @ManyToOne
-    @JoinColumn(name = "last_reviewed_by")
-    private User lastReviewedBy;
+    @Column(name = "last_reviewed_by")
+    private Integer lastReviewedByUserId;
 
     @Column(name = "last_reviewed_date")
     private LocalDateTime lastReviewedDate;
@@ -105,9 +102,8 @@ public class Goal {
     @Column(name = "evidence_link_verification_notes", columnDefinition = "TEXT")
     private String evidenceLinkVerificationNotes;
 
-    @ManyToOne
-    @JoinColumn(name = "evidence_link_verified_by")
-    private User evidenceLinkVerifiedBy;
+    @Column(name = "evidence_link_verified_by")
+    private Integer evidenceLinkVerifiedByUserId;
 
     @Column(name = "evidence_link_verified_date")
     private LocalDateTime evidenceLinkVerifiedDate;
@@ -117,9 +113,8 @@ public class Goal {
     @Column(name = "completion_approval_status", length = 30)
     private CompletionApprovalStatus completionApprovalStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "completion_approved_by")
-    private User completionApprovedBy;
+    @Column(name = "completion_approved_by")
+    private Integer completionApprovedByUserId;
 
     @Column(name = "completion_approved_date")
     private LocalDateTime completionApprovedDate;

@@ -1,11 +1,13 @@
-package com.project.performanceTrack.service;
+package com.project.coreservice.service;
 
-import com.project.performanceTrack.dto.ApproveCompletionRequest;
-import com.project.performanceTrack.dto.CreateGoalRequest;
-import com.project.performanceTrack.dto.SubmitCompletionRequest;
-import com.project.performanceTrack.exception.BadRequestException;
-import com.project.performanceTrack.exception.ResourceNotFoundException;
-import com.project.performanceTrack.exception.UnauthorizedException;
+import com.project.coreservice.client.AuthUserClient;
+import com.project.coreservice.client.NotificationClient;
+
+import com.project.coreservice.dto.CreateGoalRequest;
+import com.project.coreservice.entity.Goal;
+import com.project.coreservice.repository.FeedbackRepository;
+import com.project.coreservice.repository.GoalCompletionApprovalRepository;
+import com.project.coreservice.repository.GoalRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,15 +24,12 @@ public class GoalService {
 
     private final GoalRepository goalRepo;
 
-    private final UserRepository userRepo;
-
-    private final AuditLogRepository auditRepo;
-
     private final FeedbackRepository fbRepo;
 
     private final GoalCompletionApprovalRepository approvalRepo;
 
-    private final NotificationService notificationService;
+    private final AuthUserClient authUserClient;
+    private final NotificationClient notificationClient;
 
     // Create new goal (Employee)
     @Transactional

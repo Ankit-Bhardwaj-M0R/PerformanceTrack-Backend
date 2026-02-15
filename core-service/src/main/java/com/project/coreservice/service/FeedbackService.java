@@ -1,6 +1,16 @@
-package com.project.performanceTrack.service;
+package com.project.coreservice.service;
 
+import com.project.coreservice.client.AuthUserClient;
+import com.project.coreservice.dto.*;
+import com.project.coreservice.entity.Feedback;
+import com.project.coreservice.entity.Goal;
+import com.project.coreservice.entity.PerformanceReview;
+import com.project.coreservice.exception.ResourceNotFoundException;
+import com.project.coreservice.repository.FeedbackRepository;
+import com.project.coreservice.repository.GoalRepository;
+import com.project.coreservice.repository.PerformanceReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,20 +18,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
-@RequiredArgsConstructor // Automatically injects all final fields
+@RequiredArgsConstructor
 public class FeedbackService {
 
     private final FeedbackRepository fbRepo;
-    private final UserRepository userRepo;
     private final GoalRepository goalRepo;
     private final PerformanceReviewRepository reviewRepo;
-    private final AuditLogService auditLogService;
+    private final AuthUserClient authUserClient; // CHANGED: Replaces UserRepository
     private final ModelMapper modelMapper;
 
     /**
      * Retrieves a list of feedback records filtered by Goal ID or Review ID
-     * Or else it'll return everything if no filters are provided.
      */
     public List<FeedbackResponseDTO> getFilteredFeedback(Integer goalId, Integer reviewId) {
         List<Feedback> feedbackList;
@@ -33,45 +42,54 @@ public class FeedbackService {
                 .map(fb -> modelMapper.map(fb, FeedbackResponseDTO.class))
                 .toList();
     }
+
     /**
-     * Persists a new feedback entry, associates it with the providing user and target entity.
-     * And records the action in the audit log.
-    **/
-    //Ensures both feedback and audit log save together
+     * Persists a new feedback entry
+     */
     @Transactional
     public FeedbackResponseDTO saveFeedback(Integer userId, FeedbackRequest request) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // CHANGED: Get user info from AuthUserClient instead of UserRepository
+        ApiResponse<UserSummaryDTO> userResponse = authUserClient.getUserById(userId);
+        if (userResponse == null || userResponse.getData() == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
 
-        // Map request to entity, then manually set the specific relations
+        // Map request to entity
         Feedback fb = modelMapper.map(request, Feedback.class);
-        fb.setGivenByUser(user);
+        fb.setGivenByUserId(userId); // CHANGED: Store userId instead of User entity
         fb.setDate(LocalDateTime.now());
 
         if (request.getGoalId() != null) {
             Goal goal = goalRepo.findById(request.getGoalId())
-                    //earlier was using ifPresent instead of orElseThrow, it caused orphan data insertion.
-                    .orElseThrow(() -> new RuntimeException("Goal not found with ID " + request.getGoalId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Goal not found with ID " + request.getGoalId()));
             fb.setGoal(goal);
         }
         if (request.getReviewId() != null) {
             PerformanceReview review = reviewRepo.findById(request.getReviewId())
-                    .orElseThrow(() -> new RuntimeException("Review not found with ID " + request.getReviewId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Review not found with ID " + request.getReviewId()));
             fb.setReview(review);
         }
-        //Saves the feedback entity to get the ID first
+
+        // Save the feedback entity
         Feedback savedFb = fbRepo.save(fb);
 
-        //Log the audit event using pre-defined service method
-        auditLogService.logAudit(
-                user,
-                "FEEDBACK_CREATED",
+        // CHANGED: Log audit via AuthUserClient instead of AuditLogService
+        createAuditLog(userId, "FEEDBACK_CREATED",
                 "Created feedback for " + (request.getGoalId() != null ? "Goal ID: " + request.getGoalId() : "Review ID: " + request.getReviewId()),
-                "Feedback",
-                savedFb.getFeedbackId(), // Assuming your Feedback entity uses feedbackId
-                "SUCCESS"
-        );
+                "Feedback", savedFb.getFeedbackId());
 
         return modelMapper.map(savedFb, FeedbackResponseDTO.class);
+    }
+
+    // CHANGED: Helper method to create audit logs via AuthUserClient
+    private void createAuditLog(Integer userId, String action, String details, String entityType, Integer entityId) {
+        try {
+            AuditLogRequest auditReq = new AuditLogRequest(
+                    userId, action, details, entityType, entityId, "SUCCESS", null
+            );
+            authUserClient.createAuditLog(auditReq);
+        } catch (Exception e) {
+            log.error("Failed to create audit log: {}", e.getMessage());
+        }
     }
 }

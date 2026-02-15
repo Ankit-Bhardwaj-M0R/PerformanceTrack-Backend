@@ -1,4 +1,4 @@
-package com.project.performanceTrack.dto;
+package com.project.coreservice.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

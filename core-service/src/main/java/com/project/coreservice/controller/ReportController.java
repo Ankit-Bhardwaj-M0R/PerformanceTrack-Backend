@@ -1,8 +1,9 @@
-package com.project.performanceTrack.controller;
+package com.project.coreservice.controller;
 
-import com.project.performanceTrack.dto.ApiResponse;
-import com.project.performanceTrack.entity.Report;
-import com.project.performanceTrack.service.ReportService;
+
+import com.project.coreservice.dto.ApiResponse;
+import com.project.coreservice.entity.Report;
+import com.project.coreservice.service.ReportService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

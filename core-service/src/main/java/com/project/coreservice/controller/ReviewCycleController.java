@@ -1,12 +1,14 @@
-package com.project.performanceTrack.controller;
+package com.project.coreservice.controller;
 
-import com.project.performanceTrack.dto.ApiResponse;
-import com.project.performanceTrack.dto.CreateReviewCycleRequest;
-import com.project.performanceTrack.entity.ReviewCycle;
-import com.project.performanceTrack.service.ReviewCycleService;
+import com.project.coreservice.dto.ApiResponse;
+import com.project.coreservice.dto.CreateReviewCycleRequest;
+import com.project.coreservice.dto.ReviewCycleSummaryDTO;
+import com.project.coreservice.entity.ReviewCycle;
+import com.project.coreservice.service.ReviewCycleService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,5 +61,19 @@ public class ReviewCycleController {
         ReviewCycle cycle = cycleSvc.updateCycle(cycleId, req, adminId);
         return ApiResponse.success("Review cycle updated", cycle);
     }
+
+    @GetMapping("/internal/review-cycles/active")
+    public ResponseEntity<ApiResponse<ReviewCycleSummaryDTO>> getActiveReviewCycle() {
+        ReviewCycle cycle = cycleSvc.getActiveReviewCycle();
+        if (cycle == null) {
+            return ResponseEntity.ok(new ApiResponse<>("success", "No active cycle", null));
+        }
+        ReviewCycleSummaryDTO dto = new ReviewCycleSummaryDTO(
+                cycle.getCycleId(), cycle.getTitle(), cycle.getStartDate(),
+                cycle.getEndDate(), cycle.getStatus().name()
+        );
+        return ResponseEntity.ok(new ApiResponse<>("success", "Active cycle retrieved", dto));
+    }
+
 
 }

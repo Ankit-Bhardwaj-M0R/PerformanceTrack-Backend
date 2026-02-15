@@ -1,4 +1,4 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
@@ -31,9 +31,8 @@ public class Feedback {
     @JoinColumn(name = "goal_id")
     private Goal goal;
 
-    @ManyToOne
-    @JoinColumn(name = "given_by_user_id")
-    private User givenByUser;
+    @Column(name = "given_by_user_id")
+    private Integer givenByUserId;
 
     @Column(columnDefinition = "TEXT")
     private String comments;

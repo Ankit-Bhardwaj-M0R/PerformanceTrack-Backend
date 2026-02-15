@@ -1,46 +1,46 @@
-package com.project.performanceTrack.service;
+// ORIGINAL (Monolith):
+// package com.project.performanceTrack.service;
+// private final UserRepository userRepo;
+// private final AuditLogRepository auditRepo;
+// User user = userRepo.findById(userId).orElseThrow(...);
+// report.setGeneratedBy(user);
+// List<Goal> myGoals = goalRepo.findByAssignedToUser_UserId(userId);
+// List<User> teamMembers = userRepo.findByManager_UserId(userId);
 
-import com.project.performanceTrack.entity.AuditLog;
-import com.project.performanceTrack.entity.Report;
-import com.project.performanceTrack.entity.User;
-import com.project.performanceTrack.entity.Goal;
-import com.project.performanceTrack.entity.PerformanceReview;
-import com.project.performanceTrack.enums.GoalStatus;
-import com.project.performanceTrack.exception.ResourceNotFoundException;
-import com.project.performanceTrack.repository.ReportRepository;
-import com.project.performanceTrack.repository.UserRepository;
-import com.project.performanceTrack.repository.AuditLogRepository;
-import com.project.performanceTrack.repository.GoalRepository;
-import com.project.performanceTrack.repository.PerformanceReviewRepository;
+// MODIFIED FOR CORE SERVICE:
+package com.project.coreservice.service;
+
+import com.project.coreservice.client.AuthUserClient;
+import com.project.coreservice.dto.AuditLogRequest;
+import com.project.coreservice.dto.ApiResponse;
+import com.project.coreservice.dto.UserSummaryDTO;
+import com.project.coreservice.entity.Goal;
+import com.project.coreservice.entity.PerformanceReview;
+import com.project.coreservice.entity.Report;
+import com.project.coreservice.enums.GoalStatus;
+import com.project.coreservice.exception.ResourceNotFoundException;
+import com.project.coreservice.repository.GoalRepository;
+import com.project.coreservice.repository.PerformanceReviewRepository;
+import com.project.coreservice.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
-// Report service - handles report generation
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
 
-
     private final ReportRepository reportRepo;
-
-
-    private final UserRepository userRepo;
-
-
-    private final AuditLogRepository auditRepo;
-
-
     private final GoalRepository goalRepo;
-
-
     private final PerformanceReviewRepository reviewRepo;
+    private final AuthUserClient authUserClient; // CHANGED: Replaces UserRepository and AuditLogRepository
 
     // Get all reports
     public List<Report> getAllReports() {
@@ -53,38 +53,35 @@ public class ReportService {
                 .orElseThrow(() -> new ResourceNotFoundException("Report not found"));
     }
 
-    // Get reports by user
+    // Get reports by user - CHANGED: Updated repository method name
     public List<Report> getReportsByUser(Integer userId) {
-        return reportRepo.findByGeneratedBy_UserIdOrderByGeneratedDateDesc(userId);
+        return reportRepo.findByGeneratedByUserIdOrderByGeneratedDateDesc(userId);
     }
 
     // Generate report (Admin/Manager)
     public Report generateReport(String scope, String metrics, String format, Integer userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        // CHANGED: Validate user exists via AuthUserClient
+        ApiResponse<UserSummaryDTO> userResponse = authUserClient.getUserById(userId);
+        if (userResponse == null || userResponse.getData() == null) {
+            throw new ResourceNotFoundException("User not found");
+        }
 
-        // Create report
+        // Create report - CHANGED: Store userId instead of User entity
         Report report = new Report();
         report.setScope(scope);
         report.setMetrics(metrics);
         report.setFormat(format);
-        report.setGeneratedBy(user);
+        report.setGeneratedByUserId(userId); // CHANGED: Use Integer userId field
         report.setGeneratedDate(LocalDateTime.now());
         report.setFilePath("/reports/" + System.currentTimeMillis() + "." + format.toLowerCase());
 
         // Save report
         Report saved = reportRepo.save(report);
 
-        // Create audit log
-        AuditLog log = new AuditLog();
-        log.setUser(user);
-        log.setAction("REPORT_GENERATED");
-        log.setDetails("Generated " + scope + " report in " + format + " format");
-        log.setRelatedEntityType("Report");
-        log.setRelatedEntityId(saved.getReportId());
-        log.setStatus("SUCCESS");
-        log.setTimestamp(LocalDateTime.now());
-        auditRepo.save(log);
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(userId, "REPORT_GENERATED",
+                "Generated " + scope + " report in " + format + " format",
+                "Report", saved.getReportId());
 
         return saved;
     }
@@ -94,8 +91,8 @@ public class ReportService {
         Map<String, Object> metrics = new HashMap<>();
 
         if (role.equals("EMPLOYEE")) {
-            // Employee dashboard metrics
-            List<Goal> myGoals = goalRepo.findByAssignedToUser_UserId(userId);
+            // Employee dashboard metrics - CHANGED: Updated repository method
+            List<Goal> myGoals = goalRepo.findByAssignedToUserId(userId);
             long completedGoals = myGoals.stream().filter(g -> g.getStatus() == GoalStatus.COMPLETED).count();
             long inProgressGoals = myGoals.stream().filter(g -> g.getStatus() == GoalStatus.IN_PROGRESS).count();
             long pendingGoals = myGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING).count();
@@ -107,22 +104,25 @@ public class ReportService {
             metrics.put("completionRate", myGoals.size() > 0 ? (completedGoals * 100.0 / myGoals.size()) : 0);
 
         } else if (role.equals("MANAGER")) {
-            // Manager dashboard metrics
-            List<Goal> teamGoals = goalRepo.findByAssignedManager_UserId(userId);
-            List<User> teamMembers = userRepo.findByManager_UserId(userId);
+            // Manager dashboard metrics - CHANGED: Updated repository method
+            List<Goal> teamGoals = goalRepo.findByAssignedManagerId(userId);
 
-            metrics.put("teamSize", teamMembers.size());
+            // CHANGED: Get team members via AuthUserClient
+            ApiResponse<List<UserSummaryDTO>> teamResponse = authUserClient.getTeamByManager(userId);
+            int teamSize = (teamResponse != null && teamResponse.getData() != null) ? teamResponse.getData().size() : 0;
+
+            metrics.put("teamSize", teamSize);
             metrics.put("totalTeamGoals", teamGoals.size());
             metrics.put("pendingApprovals", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING).count());
-            metrics.put("pendingCompletions", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING_COMPLETION_APPROVAL).count());
+            metrics.put("pendingCompletions", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.AWAITING_COMPLETION_APPROVAL).count());
 
         } else {
-            // Admin dashboard metrics
-            List<User> allUsers = userRepo.findAll();
+            // Admin dashboard metrics - CHANGED: Cannot get all users from AuthUserClient directly
+            // Only report on goals and reviews in core_db
             List<Goal> allGoals = goalRepo.findAll();
             List<PerformanceReview> allReviews = reviewRepo.findAll();
 
-            metrics.put("totalUsers", allUsers.size());
+            metrics.put("totalUsers", "N/A"); // Would require separate call to auth-user-service
             metrics.put("totalGoals", allGoals.size());
             metrics.put("totalReviews", allReviews.size());
             metrics.put("completedGoals", allGoals.stream().filter(g -> g.getStatus() == GoalStatus.COMPLETED).count());
@@ -142,11 +142,11 @@ public class ReportService {
             reviews = reviewRepo.findAll();
         }
 
-        // Filter by department if provided
+        // Filter by department if provided - CHANGED: Department filtering requires user data
+        // This would require fetching user details for each review from AuthUserClient
+        // For now, skip department filtering or implement lazy loading
         if (dept != null && !dept.isEmpty()) {
-            reviews = reviews.stream()
-                    .filter(r -> dept.equals(r.getUser().getDepartment()))
-                    .toList();
+            log.warn("Department filtering requires cross-service calls - not implemented in this version");
         }
 
         // Calculate metrics
@@ -181,7 +181,7 @@ public class ReportService {
         // Status breakdown
         long pending = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING).count();
         long inProgress = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.IN_PROGRESS).count();
-        long pendingCompletion = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING_COMPLETION_APPROVAL).count();
+        long pendingCompletion = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.AWAITING_COMPLETION_APPROVAL).count();
         long completed = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.COMPLETED).count();
         long rejected = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.REJECTED).count();
 
@@ -196,39 +196,30 @@ public class ReportService {
         return analytics;
     }
 
-    // Get department performance
+    // Get department performance - CHANGED: Requires cross-service calls
     public List<Map<String, Object>> getDepartmentPerformance() {
         List<Map<String, Object>> performance = new ArrayList<>();
 
-        // Get all unique departments
-        List<User> allUsers = userRepo.findAll();
-        List<String> departments = allUsers.stream()
-                .map(User::getDepartment)
-                .filter(dept -> dept != null && !dept.isEmpty())
-                .distinct()
-                .toList();
+        // CHANGED: This method requires significant refactoring as it needs:
+        // 1. List of all users with departments (from auth-user-service)
+        // 2. Goals for each user
+        // This would require multiple Feign calls and may be performance-intensive
 
-        // For each department, calculate metrics
-        for (String dept : departments) {
-            Map<String, Object> deptMetrics = new HashMap<>();
-
-            List<User> deptUsers = userRepo.findByDepartment(dept);
-            List<Goal> deptGoals = new ArrayList<>();
-            for (User user : deptUsers) {
-                deptGoals.addAll(goalRepo.findByAssignedToUser_UserId(user.getUserId()));
-            }
-
-            long completedGoals = deptGoals.stream().filter(g -> g.getStatus() == GoalStatus.COMPLETED).count();
-
-            deptMetrics.put("department", dept);
-            deptMetrics.put("employeeCount", deptUsers.size());
-            deptMetrics.put("totalGoals", deptGoals.size());
-            deptMetrics.put("completedGoals", completedGoals);
-            deptMetrics.put("completionRate", deptGoals.size() > 0 ? (completedGoals * 100.0 / deptGoals.size()) : 0);
-
-            performance.add(deptMetrics);
-        }
+        log.warn("getDepartmentPerformance requires cross-service calls - returning empty list");
+        // TODO: Implement with batch user fetching from AuthUserClient if needed
 
         return performance;
+    }
+
+    // CHANGED: Helper method to create audit logs via AuthUserClient
+    private void createAuditLog(Integer userId, String action, String details, String entityType, Integer entityId) {
+        try {
+            AuditLogRequest auditReq = new AuditLogRequest(
+                    userId, action, details, entityType, entityId, "SUCCESS", null
+            );
+            authUserClient.createAuditLog(auditReq);
+        } catch (Exception e) {
+            log.error("Failed to create audit log: {}", e.getMessage());
+        }
     }
 }

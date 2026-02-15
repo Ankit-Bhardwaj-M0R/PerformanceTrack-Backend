@@ -1,6 +1,7 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
-import com.project.performanceTrack.enums.PerformanceReviewStatus;
+
+import com.project.coreservice.enums.PerformanceReviewStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,9 +28,8 @@ public class PerformanceReview {
     @JoinColumn(name = "cycle_id", nullable = false)
     private ReviewCycle cycle;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     // Self-assessment stored as JSON string
     @Column(name = "self_assessment", columnDefinition = "TEXT")
@@ -55,9 +55,8 @@ public class PerformanceReview {
     @Column(name = "next_period_goals", columnDefinition = "TEXT")
     private String nextPeriodGoals;
 
-    @ManyToOne
-    @JoinColumn(name = "reviewed_by")
-    private User reviewedBy;
+    @Column(name = "reviewed_by")
+    private Integer reviewedByUserId;
 
     @Column(name = "review_completed_date")
     private LocalDateTime reviewCompletedDate;
@@ -69,9 +68,8 @@ public class PerformanceReview {
     @Column(name = "submitted_date")
     private LocalDateTime submittedDate;
 
-    @ManyToOne
-    @JoinColumn(name = "acknowledged_by")
-    private User acknowledgedBy;
+    @Column(name = "acknowledged_by")
+    private Integer acknowledgedByUserId;
 
     @Column(name = "acknowledged_date")
     private LocalDateTime acknowledgedDate;

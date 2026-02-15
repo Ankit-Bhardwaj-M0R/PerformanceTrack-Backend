@@ -1,7 +1,8 @@
-package com.project.performanceTrack.dto;
+package com.project.coreservice.dto;
 
-import com.project.performanceTrack.enums.GoalCategory;
-import com.project.performanceTrack.enums.GoalPriority;
+
+import com.project.coreservice.enums.GoalCategory;
+import com.project.coreservice.enums.GoalPriority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.project.performanceTrack.dto;
+package com.project.coreservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

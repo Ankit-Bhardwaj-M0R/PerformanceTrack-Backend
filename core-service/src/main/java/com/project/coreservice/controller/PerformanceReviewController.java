@@ -1,10 +1,11 @@
-package com.project.performanceTrack.controller;
+package com.project.coreservice.controller;
 
-import com.project.performanceTrack.dto.ApiResponse;
-import com.project.performanceTrack.dto.ManagerReviewRequest;
-import com.project.performanceTrack.dto.SelfAssessmentRequest;
-import com.project.performanceTrack.entity.PerformanceReview;
-import com.project.performanceTrack.service.PerformanceReviewService;
+
+import com.project.coreservice.dto.ApiResponse;
+import com.project.coreservice.dto.ManagerReviewRequest;
+import com.project.coreservice.dto.SelfAssessmentRequest;
+import com.project.coreservice.entity.PerformanceReview;
+import com.project.coreservice.service.PerformanceReviewService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

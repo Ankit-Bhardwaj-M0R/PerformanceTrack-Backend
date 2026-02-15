@@ -1,4 +1,4 @@
-package com.project.performanceTrack.exception;
+package com.project.coreservice.exception;
 
 import com.project.performanceTrack.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,8 @@
-package com.project.performanceTrack.controller;
+package com.project.coreservice.controller;
 
-import com.project.performanceTrack.entity.Goal;
-import com.project.performanceTrack.service.GoalService;
+import com.project.coreservice.dto.*;
+import com.project.coreservice.entity.Goal;
+import com.project.coreservice.service.GoalService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -195,4 +197,21 @@ public class GoalController {
         String progress = goalSvc.getProgressUpdates(goalId);
         return ApiResponse.success("Progress retrieved", progress);
     }
+
+    @GetMapping("/internal/goals/by-status/{status}")
+    public ResponseEntity<ApiResponse<List<GoalSummaryDTO>>> getGoalsByStatus(@PathVariable String status) {
+        List<Goal> goals = goalSvc.getGoalsByStatus(status);
+        List<GoalSummaryDTO> dtos = goals.stream()
+                .map(g -> new GoalSummaryDTO(g.getGoalId(), g.getTitle(), g.getStatus().name(),
+                        g.getAssignedToUserId(), g.getAssignedManagerId(), g.getCreatedDate().toLocalDate()))
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>("success", "Goals retrieved", dtos));
+    }
+
+    @GetMapping("/internal/goals/pending-approval")
+    public ResponseEntity<ApiResponse<List<GoalSummaryDTO>>> getGoalsPendingApproval(
+            @RequestParam int pendingDays) {
+        // Implementation to return goals pending for more than pendingDays
+    }
+
 }

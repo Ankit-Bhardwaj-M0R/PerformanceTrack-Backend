@@ -1,6 +1,7 @@
-package com.project.performanceTrack.dto;
+package com.project.coreservice.dto;
 
-import com.project.performanceTrack.enums.ReviewCycleStatus;
+
+import com.project.coreservice.enums.ReviewCycleStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

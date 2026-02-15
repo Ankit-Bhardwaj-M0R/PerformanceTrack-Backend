@@ -1,4 +1,4 @@
-package com.project.performanceTrack.entity;
+package com.project.coreservice.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,9 +28,8 @@ public class GoalCompletionApproval {
     @Column(name = "approval_decision", nullable = false, length = 40)
     private String approvalDecision;
 
-    @ManyToOne
-    @JoinColumn(name = "approved_by", nullable = false)
-    private User approvedBy;
+    @Column(name = "approved_by", nullable = false)
+    private Integer approvedByUserId;
 
     @Column(name = "approval_date", nullable = false)
     private LocalDateTime approvalDate;

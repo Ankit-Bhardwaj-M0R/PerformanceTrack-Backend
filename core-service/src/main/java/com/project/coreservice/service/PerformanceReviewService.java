@@ -1,210 +1,218 @@
-package com.project.performanceTrack.service;
-import com.project.performanceTrack.dto.ManagerReviewRequest;
-import com.project.performanceTrack.dto.SelfAssessmentRequest;
-import com.project.performanceTrack.enums.GoalStatus;
-import com.project.performanceTrack.enums.NotificationType;
-import com.project.performanceTrack.enums.PerformanceReviewStatus;
-import com.project.performanceTrack.exception.BadRequestException;
-import com.project.performanceTrack.exception.ResourceNotFoundException;
-import com.project.performanceTrack.exception.UnauthorizedException;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+// ORIGINAL (Monolith):
+// package com.project.performanceTrack.service;
+// private final UserRepository userRepo;
+// private final AuditLogService auditLogService;
+// User emp = userRepo.findById(empId).orElseThrow(...);
+// User mgr = userRepo.findById(mgrId).orElseThrow(...);
+// review.setEmployee(emp);
+// review.setManager(mgr);
 
-import java.time.LocalDateTime;
+// MODIFIED FOR CORE SERVICE:
+package com.project.coreservice.service;
+
+import com.project.coreservice.client.AuthUserClient;
+import com.project.coreservice.dto.*;
+import com.project.coreservice.entity.PerformanceReview;
+import com.project.coreservice.entity.ReviewCycle;
+import com.project.coreservice.enums.ReviewStatus;
+import com.project.coreservice.exception.BadRequestException;
+import com.project.coreservice.exception.ResourceNotFoundException;
+import com.project.coreservice.repository.PerformanceReviewRepository;
+import com.project.coreservice.repository.ReviewCycleRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PerformanceReviewService {
 
     private final PerformanceReviewRepository reviewRepo;
-    private final UserRepository userRepo;
     private final ReviewCycleRepository cycleRepo;
-    private final AuditLogRepository auditRepo;
-    private final PerformanceReviewGoalsRepository reviewGoalsRepo;
-    private final GoalRepository goalRepo;
-    private final AuditLogService auditLogService; //updated
-    private final NotificationService notificationService;
+    private final AuthUserClient authUserClient; // CHANGED: Replaces UserRepository
+    private final ModelMapper modelMapper;
 
-    //get reviews by user
-    public List<PerformanceReview> getReviewsByUser(Integer userId){
-        return reviewRepo.findByUser_UserId(userId);
+    // Get all reviews
+    public List<PerformanceReview> getAllReviews() {
+        return reviewRepo.findAll();
     }
 
-    //get reviews by cycle
-    public List<PerformanceReview> getReviewsByCycle(Integer cycleId){
-        return  reviewRepo.findByCycle_CycleId(cycleId);
-    }
-
-    // get review by ID
+    // Get review by ID
     public PerformanceReview getReviewById(Integer reviewId) {
         return reviewRepo.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Performance Review not found"));
     }
 
-    //submit self-assessment (Employee)
+    // Get reviews by employee - CHANGED: Updated repository method
+    public List<PerformanceReview> getReviewsByEmployee(Integer employeeId) {
+        return reviewRepo.findByEmployeeId(employeeId);
+    }
+
+    // Get reviews by manager - CHANGED: Updated repository method
+    public List<PerformanceReview> getReviewsByManager(Integer managerId) {
+        return reviewRepo.findByManagerId(managerId);
+    }
+
+    // Get reviews by cycle
+    public List<PerformanceReview> getReviewsByCycle(Integer cycleId) {
+        return reviewRepo.findByCycle_CycleId(cycleId);
+    }
+
+    // Create performance review (Manager/Admin)
     @Transactional
-    public PerformanceReview submitSelfAssessment(SelfAssessmentRequest req, Integer empId){
-        //get employee
-        User emp = userRepo.findById(empId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+    public PerformanceReview createReview(CreatePerformanceReviewRequest req, Integer managerId) {
+        // CHANGED: Validate employee and manager via AuthUserClient
+        ApiResponse<UserSummaryDTO> empResponse = authUserClient.getUserById(req.getEmployeeId());
+        if (empResponse == null || empResponse.getData() == null) {
+            throw new ResourceNotFoundException("Employee not found");
+        }
 
-        //get review cycle
+        ApiResponse<UserSummaryDTO> mgrResponse = authUserClient.getUserById(managerId);
+        if (mgrResponse == null || mgrResponse.getData() == null) {
+            throw new ResourceNotFoundException("Manager not found");
+        }
+
+        // CHANGED: Verify manager relationship
+        UserSummaryDTO employee = empResponse.getData();
+        if (employee.getManagerId() == null || !employee.getManagerId().equals(managerId)) {
+            throw new BadRequestException("You can only create reviews for your direct reports");
+        }
+
+        // Get cycle
         ReviewCycle cycle = cycleRepo.findById(req.getCycleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Review cycle not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Review Cycle not found"));
 
-        //check if review already exists
-        PerformanceReview review = reviewRepo
-                .findByCycle_CycleIdAndUser_UserId(req.getCycleId(), empId)
-                .orElse(null);
+        // Create review - CHANGED: Store IDs instead of User entities
+        PerformanceReview review = new PerformanceReview();
+        review.setEmployeeId(req.getEmployeeId()); // CHANGED: Use Integer field
+        review.setManagerId(managerId); // CHANGED: Use Integer field
+        review.setCycle(cycle);
+        review.setReviewPeriodStart(req.getReviewPeriodStart());
+        review.setReviewPeriodEnd(req.getReviewPeriodEnd());
+        review.setStatus(ReviewStatus.PENDING_SELF_REVIEW);
+        review.setCreatedDate(LocalDate.now());
 
-        if(review != null && review.getStatus() != PerformanceReviewStatus.PENDING){
-            throw  new UnauthorizedException("Self-assessment already submitted");
-        }
-
-        // Create or update review
-        if (review == null) {
-            review = new PerformanceReview();
-            review.setCycle(cycle);
-            review.setUser(emp);
-        }
-
-        review.setSelfAssessment(req.getSelfAssmt());
-        review.setEmployeeSelfRating(req.getSelfRating());
-        review.setStatus(PerformanceReviewStatus.SELF_ASSESSMENT_COMPLETED);
-        review.setSubmittedDate(LocalDateTime.now());
-
-        //save review
+        // Save review
         PerformanceReview saved = reviewRepo.save(review);
 
-        //link completed goals to this review
-        List<Goal> completedGoals = goalRepo.findByAssignedToUser_UserIdAndStatus(empId, GoalStatus.COMPLETED);
-        for(Goal goal : completedGoals){
-            PerformanceReviewGoals link = new PerformanceReviewGoals();
-            link.setReview(saved);
-            link.setGoal(goal);
-            link.setLinkedDate(LocalDateTime.now());
-            reviewGoalsRepo.save(link);
-        }
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(managerId, "PERFORMANCE_REVIEW_CREATED",
+                "Created performance review for employee ID: " + req.getEmployeeId(),
+                "PerformanceReview", saved.getReviewId());
 
-        // Notifications using service class
-        if (emp.getManager() != null) {
-            notificationService.sendNotification(emp.getManager(), NotificationType.SELF_ASSESSMENT_SUBMITTED,
-                    emp.getName() + " submitted self-assessment", "PerformanceReview", saved.getReviewId(), "HIGH", true);
-        }
-
-
-        // Centralized audit log
-        auditLogService.logAudit(emp, "SELF_ASSESSMENT_SUBMITTED",
-                "Submitted self-assessment for " + cycle.getTitle(), "PerformanceReview", saved.getReviewId(), "SUCCESS");
         return saved;
-
     }
 
-    //update self-assessment draft (Employee)
+    // Employee submits self-review
     @Transactional
-    public PerformanceReview updateSelfAssessmentDraft(Integer reviewId, SelfAssessmentRequest req, Integer empId){
+    public PerformanceReview submitSelfReview(Integer reviewId, SelfReviewRequest req, Integer employeeId) {
         PerformanceReview review = getReviewById(reviewId);
 
-        //check authorization
-        if(!review.getUser().getUserId().equals(empId)){
-            throw new UnauthorizedException("Not authorized");
+        // CHANGED: Verify employee owns this review
+        if (!review.getEmployeeId().equals(employeeId)) {
+            throw new BadRequestException("You can only submit self-review for your own review");
         }
 
-        // Can only update if still in pending or self-assessment status
-        if (review.getStatus() != PerformanceReviewStatus.PENDING &&
-                review.getStatus() != PerformanceReviewStatus.SELF_ASSESSMENT_COMPLETED) {
-            throw new BadRequestException("Cannot update - review already completed");
+        if (review.getStatus() != ReviewStatus.PENDING_SELF_REVIEW) {
+            throw new BadRequestException("Review is not in PENDING_SELF_REVIEW status");
         }
 
-        //update self assessment
-        review.setSelfAssessment((req.getSelfAssmt()));
+        // Update self-review fields
         review.setEmployeeSelfRating(req.getSelfRating());
+        review.setEmployeeComments(req.getSelfComments());
+        review.setStatus(ReviewStatus.PENDING_MANAGER_REVIEW);
 
-        //save without changing status
+        // Save review
         PerformanceReview updated = reviewRepo.save(review);
-        User emp = userRepo.findById(empId).orElse(null);
-        //auditLog
-        auditLogService.logAudit(emp, "SELF_ASSESSMENT_DRAFT_UPDATED",
-                "Updated self-assessment draft", "PerformanceReview", reviewId, "SUCCESS");
+
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(employeeId, "SELF_REVIEW_SUBMITTED",
+                "Submitted self-review for review ID: " + reviewId,
+                "PerformanceReview", reviewId);
 
         return updated;
     }
 
-   // submit manager review (Manager)
+    // Manager submits manager review
     @Transactional
-    public  PerformanceReview submitManagerReview(Integer reviewId, ManagerReviewRequest req, Integer mgrId){
+    public PerformanceReview submitManagerReview(Integer reviewId, ManagerReviewRequest req, Integer managerId) {
         PerformanceReview review = getReviewById(reviewId);
 
-        //check authorization
-        if (!review.getUser().getManager().getUserId().equals(mgrId)) {
-            throw new UnauthorizedException("Not authorized");
+        // CHANGED: Verify manager owns this review
+        if (!review.getManagerId().equals(managerId)) {
+            throw new BadRequestException("You can only submit manager review for your team members");
         }
 
-        // Check if self-assessment is completed
-        if (review.getStatus() != PerformanceReviewStatus.SELF_ASSESSMENT_COMPLETED) {
-            throw new BadRequestException("Self-assessment not completed");
+        if (review.getStatus() != ReviewStatus.PENDING_MANAGER_REVIEW) {
+            throw new BadRequestException("Review is not in PENDING_MANAGER_REVIEW status");
         }
 
-        //update review
-        User mgr = userRepo.findById(mgrId).orElse(null);
-        review.setManagerFeedback(req.getMgrFb());
-        review.setManagerRating(req.getMgrRating());
-        review.setRatingJustification(req.getRatingJust());
-        review.setCompensationRecommendations(req.getCompRec());
-        review.setNextPeriodGoals(req.getNextGoals());
-        review.setReviewedBy(mgr);
-        review.setReviewCompletedDate(LocalDateTime.now());
-        review.setStatus(PerformanceReviewStatus.COMPLETED);
+        // Update manager review fields
+        review.setManagerRating(req.getManagerRating());
+        review.setManagerComments(req.getManagerComments());
+        review.setStatus(ReviewStatus.COMPLETED);
+        review.setCompletedDate(LocalDate.now());
 
-        //save review
-        PerformanceReview saved = reviewRepo.save(review);
+        // Save review
+        PerformanceReview updated = reviewRepo.save(review);
 
-        notificationService.sendNotification(review.getUser(), NotificationType.PERFORMANCE_REVIEW_COMPLETED,
-                "Your performance review has been completed", "PerformanceReview", reviewId, "HIGH", false);
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(managerId, "MANAGER_REVIEW_SUBMITTED",
+                "Submitted manager review for review ID: " + reviewId,
+                "PerformanceReview", reviewId);
 
-        auditLogService.logAudit(mgr, "MANAGER_REVIEW_COMPLETED",
-                "Completed review for " + review.getUser().getName(), "PerformanceReview", reviewId, "SUCCESS");
-
-        return saved;
+        return updated;
     }
 
-    //acknowledge review (Employee)
+    // Update review status (Admin)
     @Transactional
-    public PerformanceReview acknowledgeReview(Integer reviewId, Integer empId, String response){
+    public PerformanceReview updateReviewStatus(Integer reviewId, ReviewStatus newStatus, Integer adminId) {
         PerformanceReview review = getReviewById(reviewId);
+        ReviewStatus oldStatus = review.getStatus();
+        review.setStatus(newStatus);
 
-        // Check authorization
-        if (!review.getUser().getUserId().equals(empId)) {
-            throw new UnauthorizedException("Not authorized");
+        if (newStatus == ReviewStatus.COMPLETED && review.getCompletedDate() == null) {
+            review.setCompletedDate(LocalDate.now());
         }
 
-        // Check if review is completed
-        if (review.getStatus() != PerformanceReviewStatus.COMPLETED) {
-            throw new BadRequestException("Review not completed");
+        // Save review
+        PerformanceReview updated = reviewRepo.save(review);
+
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(adminId, "REVIEW_STATUS_UPDATED",
+                "Changed review status from " + oldStatus + " to " + newStatus + " for review ID: " + reviewId,
+                "PerformanceReview", reviewId);
+
+        return updated;
+    }
+
+    // Delete review (Admin only)
+    @Transactional
+    public void deleteReview(Integer reviewId, Integer adminId) {
+        PerformanceReview review = getReviewById(reviewId);
+        reviewRepo.delete(review);
+
+        // CHANGED: Create audit log via AuthUserClient
+        createAuditLog(adminId, "PERFORMANCE_REVIEW_DELETED",
+                "Deleted performance review ID: " + reviewId,
+                "PerformanceReview", reviewId);
+    }
+
+    // CHANGED: Helper method to create audit logs via AuthUserClient
+    private void createAuditLog(Integer userId, String action, String details, String entityType, Integer entityId) {
+        try {
+            AuditLogRequest auditReq = new AuditLogRequest(
+                    userId, action, details, entityType, entityId, "SUCCESS", null
+            );
+            authUserClient.createAuditLog(auditReq);
+        } catch (Exception e) {
+            log.error("Failed to create audit log: {}", e.getMessage());
         }
-
-        //update review
-        User emp = userRepo.findById(empId).orElse(null);
-        review.setAcknowledgedBy(emp);
-        review.setAcknowledgedDate(LocalDateTime.now());
-        review.setEmployeeResponse(response);
-        review.setStatus(PerformanceReviewStatus.COMPLETED_AND_ACKNOWLEDGED);
-
-        //save review
-        PerformanceReview saved = reviewRepo.save(review);
-
-        // Use NotificationService
-        if (review.getUser().getManager() != null) {
-            notificationService.sendNotification(review.getUser().getManager(), NotificationType.REVIEW_ACKNOWLEDGED,
-                    review.getUser().getName() + " acknowledged their review", "PerformanceReview", reviewId, "NORMAL", false);
-        }
-        //audit log
-        auditLogService.logAudit(emp, "REVIEW_ACKNOWLEDGED",
-                "Acknowledged performance review", "PerformanceReview", reviewId, "SUCCESS");
-
-        return saved;
-
     }
 }

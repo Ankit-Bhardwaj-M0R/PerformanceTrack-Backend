@@ -1,19 +1,20 @@
 package com.project.coreservice.dto;
 
-import com.project.coreservice.enums.UserRole;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Login response DTO
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    private String token;       // JWT token
+@Builder
+public class UserSummaryDTO {
+
     private Integer userId;
     private String name;
     private String email;
-    private UserRole role;
+    private String role;        // "EMPLOYEE", "MANAGER", "ADMIN"
     private String department;
+    private Integer managerId;     // null if user is top-level or admin
 }
