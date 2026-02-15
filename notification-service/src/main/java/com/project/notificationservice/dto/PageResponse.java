@@ -1,6 +1,6 @@
 // NEW FILE: src/main/java/com/project/performanceTrack/dto/PageResponse.java
 
-package com.project.performanceTrack.dto;
+package com.project.notificationservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
-package com.project.performanceTrack.exception;
+package com.project.notificationservice.exception;
 
-import com.project.performanceTrack.dto.ApiResponse;
+import com.project.notificationservice.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,16 +1,19 @@
-package com.project.performanceTrack.controller;
+package com.project.notificationservice.controller;
 
-import com.project.performanceTrack.dto.ApiResponse;
-import com.project.performanceTrack.dto.PageResponse;
-import com.project.performanceTrack.entity.Notification;
-import com.project.performanceTrack.service.NotificationService;
-import com.project.performanceTrack.service.SseEmitterService;
+import com.project.notificationservice.dto.ApiResponse;
+import com.project.notificationservice.dto.NotificationRequest;
+import com.project.notificationservice.dto.PageResponse;
+import com.project.notificationservice.entity.Notification;
+import com.project.notificationservice.enums.NotificationType;
+import com.project.notificationservice.service.NotificationService;
+import com.project.notificationservice.service.SseEmitterService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -59,4 +62,25 @@ public class NotificationController {
         notificationService.markAllAsRead(userId);
         return ApiResponse.success("All notifications marked as read");
     }
+
+    @PostMapping("/internal/notifications")
+    public ResponseEntity<ApiResponse<Void>> createNotification(
+            @RequestBody NotificationRequest request) {
+        try {
+            notificationService.sendNotification(
+                    request.getUserId(),
+                    NotificationType.valueOf(request.getType()),
+                    request.getMessage(),
+                    request.getRelatedEntityType(),
+                    request.getRelatedEntityId(),
+                    request.getPriority(),
+                    request.isActionRequired()
+            );
+            return ResponseEntity.ok(ApiResponse.success("Notification sent"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("Failed to send notification: " + e.getMessage()));
+        }
+    }
+
 }

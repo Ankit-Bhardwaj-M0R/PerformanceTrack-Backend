@@ -1,4 +1,4 @@
-package com.project.performanceTrack.exception;
+package com.project.notificationservice.exception;
 
 // Custom exception for bad requests
 public class BadRequestException extends RuntimeException {

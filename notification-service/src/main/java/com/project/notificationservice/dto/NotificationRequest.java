@@ -1,16 +1,14 @@
-package com.project.authuserservice.dto;
+package com.project.notificationservice.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class NotificationRequest {
-    private Long userId;
+    private Integer userId;
     private String type;        // NotificationType as string
     private String message;
     private String priority;
@@ -18,6 +16,3 @@ public class NotificationRequest {
     private String relatedEntityType;
     private Integer relatedEntityId;
 }
-
-
-

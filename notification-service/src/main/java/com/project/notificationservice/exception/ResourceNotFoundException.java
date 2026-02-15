@@ -1,4 +1,4 @@
-package com.project.performanceTrack.exception;
+package com.project.notificationservice.exception;
 
 // Custom exception for resource not found
 public class ResourceNotFoundException extends RuntimeException {

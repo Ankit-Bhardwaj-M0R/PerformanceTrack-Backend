@@ -1,4 +1,4 @@
-package com.project.performanceTrack.exception;
+package com.project.notificationservice.exception;
 
 // Custom exception for unauthorized access
 public class UnauthorizedException extends RuntimeException {

@@ -1,18 +1,20 @@
-package com.project.performanceTrack.scheduler;
+package com.project.notificationservice.scheduler;
 
-import com.project.performanceTrack.entity.Goal;
-import com.project.performanceTrack.entity.User;
-import com.project.performanceTrack.enums.GoalStatus;
-import com.project.performanceTrack.enums.NotificationType;
-import com.project.performanceTrack.enums.ReviewCycleStatus;
-import com.project.performanceTrack.repository.GoalRepository;
-import com.project.performanceTrack.repository.ReviewCycleRepository;
-import com.project.performanceTrack.repository.UserRepository;
-import com.project.performanceTrack.service.NotificationService;
+import com.project.notificationservice.service.NotificationService;
+import com.project.notificationservice.enums.NotificationType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import com.project.notificationservice.client.AuthUserClient;
+import com.project.notificationservice.client.CoreServiceClient;
+import com.project.notificationservice.dto.GoalSummaryDTO;
+import com.project.notificationservice.dto.UserSummaryDTO;
+import com.project.notificationservice.dto.ReviewCycleSummaryDTO;
+import com.project.notificationservice.dto.ApiResponse;
+
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,89 +29,112 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NotificationScheduler {
 
-    private final GoalRepository goalRepo;
-    private final ReviewCycleRepository cycleRepo;
-    private final UserRepository userRepo;
+    private final AuthUserClient authUserClient;
+    private final CoreServiceClient coreServiceClient;
     private final NotificationService notificationService;
 
     private static final Set<Long> REMINDER_DAYS = Set.of(30L, 15L, 7L, 3L);
 
-    // Task 1: Remind managers about goals sitting in PENDING for 2+ days
-    @Scheduled(cron = "0 0 9 * * *") // Daily at 9 AM
+    @Scheduled(cron = "0 0 9 * * *")
     public void sendPendingApprovalReminders() {
         log.info("Running: pending approval reminders");
 
-        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2);
-        List<Goal> staleGoals = goalRepo.findByStatusAndCreatedDateBefore(
-                GoalStatus.PENDING, twoDaysAgo);
+        try {
+            ApiResponse<List<GoalSummaryDTO>> response =
+                    coreServiceClient.getGoalsPendingApproval(2);
 
-        // Group by manager: {manager -> count of stale goals}
-        Map<User, Long> countsByManager = staleGoals.stream()
-                .collect(Collectors.groupingBy(
-                        Goal::getAssignedManager, Collectors.counting()));
+            List<GoalSummaryDTO> staleGoals = response.getData();
 
-        countsByManager.forEach((manager, count) -> {
-            notificationService.sendNotification(
-                    manager,
-                    NotificationType.REVIEW_REMINDER,
-                    "You have " + count + " goal(s) pending approval for over 2 days",
-                    "Goal", null, "HIGH", true);
-        });
+            // Group by manager
+            Map<Integer, Long> countsByManager = staleGoals.stream()
+                    .collect(Collectors.groupingBy(
+                            GoalSummaryDTO::getAssignedManagerId, Collectors.counting()));
 
-        log.info("Completed: pending approval reminders. Notified {} managers", countsByManager.size());
+            countsByManager.forEach((managerId, count) -> {
+                try {
+                    notificationService.sendNotification(
+                            managerId,
+                            NotificationType.REVIEW_REMINDER,
+                            "You have " + count + " goal(s) pending approval for over 2 days",
+                            "Goal", null, "HIGH", true);
+                } catch (Exception e) {
+                    log.error("Failed to send notification to manager {}: {}",
+                            managerId, e.getMessage());
+                }
+            });
+
+            log.info("Completed: pending approval reminders. Notified {} managers",
+                    countsByManager.size());
+        } catch (Exception e) {
+            log.error("Failed to fetch pending goals: {}", e.getMessage());
+        }
     }
 
-    // Task 2: Remind employees when review cycle is ending soon
-    @Scheduled(cron = "0 0 10 * * *") // Daily at 10 AM
+    @Scheduled(cron = "0 0 10 * * *")
     public void sendReviewCycleEndingReminders() {
         log.info("Running: review cycle ending reminders");
 
-        cycleRepo.findFirstByStatusOrderByStartDateDesc(ReviewCycleStatus.ACTIVE)
-                .ifPresent(cycle -> {
-                    long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), cycle.getEndDate());
+        try {
+            ApiResponse<ReviewCycleSummaryDTO> response =
+                    coreServiceClient.getActiveReviewCycle();
 
-                    if (REMINDER_DAYS.contains(daysLeft)) {
-                        List<User> allUsers = userRepo.findAll();
+            ReviewCycleSummaryDTO cycle = response.getData();
 
-                        allUsers.forEach(user -> {
-                            notificationService.sendNotification(
-                                    user,
-                                    NotificationType.REVIEW_REMINDER,
-                                    "Review cycle '" + cycle.getTitle() + "' ends in "
-                                            + daysLeft + " days. Complete your goals.",
-                                    "ReviewCycle", cycle.getCycleId(),
-                                    daysLeft <= 7 ? "HIGH" : "NORMAL", false);
-                        });
+            if (cycle != null) {
+                long daysLeft = ChronoUnit.DAYS.between(LocalDate.now(), cycle.getEndDate());
 
-                        log.info("Completed: review cycle reminders. {} days left, notified {} users",
-                                daysLeft, allUsers.size());
-                    } else {
-                        log.info("Completed: review cycle reminders. {} days left, no reminder needed", daysLeft);
-                    }
-                });
+                if (REMINDER_DAYS.contains(daysLeft)) {
+                    // Get all users from auth-user-service
+                    // Note: You'll need to add a getAllUsers endpoint in auth-user-service
+                    // For now, we can skip this or implement it differently
+
+                    log.info("Review cycle '{}' ends in {} days", cycle.getTitle(), daysLeft);
+                    // Implementation depends on how you want to get all users
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch active review cycle: {}", e.getMessage());
+        }
     }
+
+
 
     // Task 3: Remind managers about completions waiting for approval for 3+ days
-    @Scheduled(cron = "0 0 9 * * MON") // Every Monday at 9 AM
-    public void sendPendingCompletionReminders() {
-        log.info("Running: pending completion reminders");
+//    @Scheduled(cron = "0 0 9 * * MON") // Every Monday at 9 AM
+//    public void sendPendingCompletionReminders() {
+//        log.info("Running: pending completion reminders");
+//
+//        try {
+//            ApiResponse<List<GoalSummaryDTO>> response =
+//                    coreServiceClient.getGoalsPendingCompletionApproval(3);
+//
+//            List<GoalSummaryDTO> staleCompletions = response.getData();
+//
+//            // Group by manager
+//            Map<Integer, Long> countsByManager = staleCompletions.stream()
+//                    .collect(Collectors.groupingBy(
+//                            GoalSummaryDTO::getAssignedManagerId, Collectors.counting()));
+//
+//            countsByManager.forEach((managerId, count) -> {
+//                try {
+//                    notificationService.sendNotification(
+//                            managerId,
+//                            NotificationType.REVIEW_REMINDER,
+//                            "You have " + count + " goal(s) pending completion approval for over 3 days",
+//                            "Goal", null, "HIGH", true);
+//                } catch (Exception e) {
+//                    log.error("Failed to send notification to manager {}: {}",
+//                            managerId, e.getMessage());
+//                }
+//            });
+//
+//            log.info("Completed: pending completion reminders. Notified {} managers",
+//                    countsByManager.size());
+//        } catch (Exception e) {
+//            log.error("Failed to fetch pending completion goals: {}", e.getMessage());
+//        }
+//    }
 
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        List<Goal> staleCompletions = goalRepo.findByStatusAndCompletionSubmittedDateBefore(
-                GoalStatus.PENDING_COMPLETION_APPROVAL, threeDaysAgo);
 
-        Map<User, Long> countsByManager = staleCompletions.stream()
-                .collect(Collectors.groupingBy(
-                        Goal::getAssignedManager, Collectors.counting()));
 
-        countsByManager.forEach((manager, count) -> {
-            notificationService.sendNotification(
-                    manager,
-                    NotificationType.REVIEW_REMINDER,
-                    "You have " + count + " goal(s) pending completion approval for over 3 days",
-                    "Goal", null, "HIGH", true);
-        });
-
-        log.info("Completed: pending completion reminders. Notified {} managers", countsByManager.size());
-    }
 }

@@ -1,11 +1,12 @@
-package com.project.performanceTrack.service;
+package com.project.notificationservice.service;
 
-import com.project.performanceTrack.entity.Notification;
-import com.project.performanceTrack.entity.User;
-import com.project.performanceTrack.enums.NotificationStatus;
-import com.project.performanceTrack.enums.NotificationType;
-import com.project.performanceTrack.exception.ResourceNotFoundException;
-import com.project.performanceTrack.repository.NotificationRepository;
+
+import com.project.notificationservice.entity.Notification;
+import com.project.notificationservice.enums.NotificationStatus;
+
+import com.project.notificationservice.enums.NotificationType;
+import com.project.notificationservice.exception.ResourceNotFoundException;
+import com.project.notificationservice.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,11 +23,12 @@ public class    NotificationService {
     private final NotificationRepository notifRepo;
     private final SseEmitterService sseEmitterService;
 
-    public void sendNotification(User user, NotificationType type, String message,
+    public void sendNotification(Integer userId, NotificationType type,
+                                 String message,
                                  String entityType, Integer entityId,
                                  String priority, boolean actionReq) {
         Notification notif = new Notification();
-        notif.setUser(user);
+        notif.setUserId(userId);  // Changed from setUser()
         notif.setType(type);
         notif.setMessage(message);
         notif.setRelatedEntityType(entityType);
@@ -37,25 +39,26 @@ public class    NotificationService {
         Notification saved = notifRepo.save(notif);
 
         // Push to user in real-time if they're connected
-        sseEmitterService.sendToUser(user.getUserId(), saved);
+        sseEmitterService.sendToUser(userId.intValue(), saved);
     }
+
 
     // Existing - keep (used by markAllAsRead)
     public List<Notification> getNotifications(Integer userId, String status) {
         if (status != null) {
             NotificationStatus notifStatus = NotificationStatus.valueOf(status.toUpperCase());
-            return notifRepo.findByUser_UserIdAndStatusOrderByCreatedDateDesc(userId, notifStatus);
+            return notifRepo.findByUserIdAndStatusOrderByCreatedDateDesc(userId, notifStatus);
         }
-        return notifRepo.findByUser_UserIdOrderByCreatedDateDesc(userId);
+        return notifRepo.findByUserIdOrderByCreatedDateDesc(userId);
     }
 
     // New - paginated
     public Page<Notification> getNotifications(Integer userId, String status, Pageable pageable) {
         if (status != null) {
             NotificationStatus notifStatus = NotificationStatus.valueOf(status.toUpperCase());
-            return notifRepo.findByUser_UserIdAndStatus(userId, notifStatus, pageable);
+            return notifRepo.findByUserIdAndStatus(userId, notifStatus, pageable);
         }
-        return notifRepo.findByUser_UserId(userId, pageable);
+        return notifRepo.findByUserId(userId, pageable);
     }
 
     public Notification markAsRead(Integer notifId) {
@@ -70,7 +73,7 @@ public class    NotificationService {
     @Transactional
     public void markAllAsRead(Integer userId) {
         List<Notification> unreadNotifs = notifRepo
-                .findByUser_UserIdAndStatusOrderByCreatedDateDesc(userId, NotificationStatus.UNREAD);
+                .findByUserIdAndStatusOrderByCreatedDateDesc(userId, NotificationStatus.UNREAD);
 
         unreadNotifs.forEach(n -> {
             n.setStatus(NotificationStatus.READ);

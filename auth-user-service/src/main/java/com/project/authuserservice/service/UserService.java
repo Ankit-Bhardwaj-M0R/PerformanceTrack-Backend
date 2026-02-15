@@ -79,15 +79,16 @@ public class UserService {
 //        );
 
         try {
-            NotificationRequest noti = new NotificationRequest(
-                    savedUser.getUserId(),
-                    NotificationType.ACCOUNT_CREATED,
-                    "Your account has been created. You can now log in.",
-                    "User",
-                    savedUser.getUserId().intValue(),  // relatedEntityId
-                    "HIGH",
-                    false
-            );
+            NotificationRequest noti = NotificationRequest.builder()
+                    .userId(savedUser.getUserId().longValue())
+                    .type("ACCOUNT_CREATED")  // ✅ String
+                    .message("Welcome to PerformanceTrack! Your account has been created. You can now log in.")
+                    .relatedEntityType("User")
+                    .relatedEntityId(savedUser.getUserId())
+                    .priority("HIGH")
+                    .actionRequired(false)  // ✅ Informational only
+                    .build();
+
             notificationClient.sendNotification(noti);
         } catch (Exception e) {
 

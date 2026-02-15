@@ -1,4 +1,4 @@
-package com.project.performanceTrack.enums;
+package com.project.notificationservice.enums;
 
 public enum GoalCategory {
     TECHNICAL,

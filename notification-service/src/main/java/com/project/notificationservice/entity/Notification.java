@@ -1,7 +1,8 @@
-package com.project.performanceTrack.entity;
+package com.project.notificationservice.entity;
 
-import com.project.performanceTrack.enums.NotificationStatus;
-import com.project.performanceTrack.enums.NotificationType;
+
+import com.project.notificationservice.enums.NotificationStatus;
+import com.project.notificationservice.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,9 +23,8 @@ public class Notification {
     @Column(name = "notification_id")
     private Integer notificationId; // Unique ID for each system alert
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)

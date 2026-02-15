@@ -1,8 +1,10 @@
-package com.project.performanceTrack.config;
+package com.project.notificationservice.config;
 
-import com.project.performanceTrack.security.JwtAuthFilter;
-import com.project.performanceTrack.security.RateLimitFilter;        // <-- new import
+
+import com.project.notificationservice.security.JwtAuthFilter;
+import com.project.notificationservice.security.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -22,6 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+
     private final RateLimitFilter rateLimitFilter;                    // <-- new field
 
     @Bean
@@ -34,10 +37,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/users/**").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers("/api/v1/review-cycles/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/audit-logs/**").hasRole("ADMIN")
+                        .requestMatchers("/internal/**").permitAll()  // Internal calls from other services
+                        .requestMatchers("/api/v1/notifications/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

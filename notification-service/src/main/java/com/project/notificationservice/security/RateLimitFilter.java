@@ -1,4 +1,4 @@
-package com.project.performanceTrack.security;
+package com.project.notificationservice.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

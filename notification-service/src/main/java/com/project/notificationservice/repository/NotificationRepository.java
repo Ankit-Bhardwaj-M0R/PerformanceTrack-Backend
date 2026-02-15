@@ -1,7 +1,7 @@
-package com.project.performanceTrack.repository;
+package com.project.notificationservice.repository;
 
-import com.project.performanceTrack.entity.Notification;
-import com.project.performanceTrack.enums.NotificationStatus;
+import com.project.notificationservice.entity.Notification;
+import com.project.notificationservice.enums.NotificationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,13 +11,12 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
+    List<Notification> findByUserIdOrderByCreatedDateDesc(Integer userId);
+    List<Notification> findByUserIdAndStatusOrderByCreatedDateDesc(Integer userId,
+                                                                   NotificationStatus status);
 
-
-
-    List<Notification> findByUser_UserIdOrderByCreatedDateDesc(Integer userId);
-    List<Notification> findByUser_UserIdAndStatusOrderByCreatedDateDesc(Integer userId, NotificationStatus status);
-
-    // New - paginated versions
-    Page<Notification> findByUser_UserId(Integer userId, Pageable pageable);
-    Page<Notification> findByUser_UserIdAndStatus(Integer userId, NotificationStatus status, Pageable pageable);
+    // Paginated versions
+    Page<Notification> findByUserId(Integer userId, Pageable pageable);
+    Page<Notification> findByUserIdAndStatus(Integer userId,
+                                             NotificationStatus status, Pageable pageable);
 }
