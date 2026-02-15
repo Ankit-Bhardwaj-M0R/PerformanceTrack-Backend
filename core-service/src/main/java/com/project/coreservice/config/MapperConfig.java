@@ -1,8 +1,9 @@
 package com.project.coreservice.config;
 
-import com.project.performanceTrack.dto.FeedbackRequest;
-import com.project.performanceTrack.dto.FeedbackResponseDTO;
-import com.project.performanceTrack.entity.Feedback;
+
+import com.project.coreservice.dto.FeedbackRequest;
+import com.project.coreservice.dto.FeedbackResponseDTO;
+import com.project.coreservice.entity.Feedback;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;

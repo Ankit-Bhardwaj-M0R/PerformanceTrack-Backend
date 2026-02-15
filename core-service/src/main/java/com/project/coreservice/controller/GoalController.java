@@ -2,11 +2,11 @@ package com.project.coreservice.controller;
 
 import com.project.coreservice.dto.*;
 import com.project.coreservice.entity.Goal;
+import com.project.coreservice.enums.GoalStatus;
 import com.project.coreservice.service.GoalService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-// Goal management controller
 @RestController
 @RequestMapping("/api/v1/goals")
 @RequiredArgsConstructor
@@ -26,7 +25,6 @@ public class GoalController {
 
     private final GoalService goalSvc;
 
-    // Create goal (Employee)
     @PostMapping
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ApiResponse<Goal> createGoal(@Valid @RequestBody CreateGoalRequest req,
@@ -36,7 +34,6 @@ public class GoalController {
         return ApiResponse.success("Goal created", goal);
     }
 
-    // Get goals by user (Employee)
     @GetMapping
     public ApiResponse<PageResponse<Goal>> getGoals(
             HttpServletRequest httpReq,
@@ -48,7 +45,6 @@ public class GoalController {
         String role = (String) httpReq.getAttribute("userRole");
         Integer currentUserId = (Integer) httpReq.getAttribute("userId");
 
-        // Cap page size at 100 to prevent abuse
         Pageable pageable = PageRequest.of(page, Math.min(size, 100),
                 Sort.by("createdDate").descending());
 
@@ -70,14 +66,12 @@ public class GoalController {
         return ApiResponse.successPage("Goals retrieved", goals);
     }
 
-    // Get goal by ID
     @GetMapping("/{goalId}")
     public ApiResponse<Goal> getGoalById(@PathVariable Integer goalId) {
         Goal goal = goalSvc.getGoalById(goalId);
         return ApiResponse.success("Goal retrieved", goal);
     }
 
-    // Approve goal (Manager)
     @PutMapping("/{goalId}/approve")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> approveGoal(@PathVariable Integer goalId,
@@ -87,7 +81,6 @@ public class GoalController {
         return ApiResponse.success("Goal approved", goal);
     }
 
-    // Request changes (Manager)
     @PutMapping("/{goalId}/request-changes")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> requestChanges(@PathVariable Integer goalId,
@@ -99,7 +92,6 @@ public class GoalController {
         return ApiResponse.success("Change request sent", goal);
     }
 
-    // Submit completion (Employee)
     @PostMapping("/{goalId}/submit-completion")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ApiResponse<Goal> submitCompletion(@PathVariable Integer goalId,
@@ -110,7 +102,6 @@ public class GoalController {
         return ApiResponse.success("Completion submitted", goal);
     }
 
-    // Approve completion (Manager)
     @PostMapping("/{goalId}/approve-completion")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> approveCompletion(@PathVariable Integer goalId,
@@ -121,7 +112,6 @@ public class GoalController {
         return ApiResponse.success("Completion approved", goal);
     }
 
-    // Request additional evidence (Manager)
     @PostMapping("/{goalId}/request-additional-evidence")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> requestEvidence(@PathVariable Integer goalId,
@@ -133,7 +123,6 @@ public class GoalController {
         return ApiResponse.success("Additional evidence requested", goal);
     }
 
-    // Update goal (Employee - only when changes requested)
     @PutMapping("/{goalId}")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ApiResponse<Goal> updateGoal(@PathVariable Integer goalId,
@@ -144,7 +133,6 @@ public class GoalController {
         return ApiResponse.success("Goal updated", goal);
     }
 
-    // Delete goal (soft delete)
     @DeleteMapping("/{goalId}")
     public ApiResponse<Void> deleteGoal(@PathVariable Integer goalId,
                                         HttpServletRequest httpReq) {
@@ -154,7 +142,6 @@ public class GoalController {
         return ApiResponse.success("Goal deleted");
     }
 
-    // Verify evidence (Manager)
     @PutMapping("/{goalId}/evidence/verify")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> verifyEvidence(@PathVariable Integer goalId,
@@ -167,7 +154,6 @@ public class GoalController {
         return ApiResponse.success("Evidence verified", goal);
     }
 
-    // Reject goal completion (Manager)
     @PostMapping("/{goalId}/reject-completion")
     @PreAuthorize("hasRole('MANAGER')")
     public ApiResponse<Goal> rejectCompletion(@PathVariable Integer goalId,
@@ -179,7 +165,6 @@ public class GoalController {
         return ApiResponse.success("Goal completion rejected", goal);
     }
 
-    // Add progress update (Employee)
     @PostMapping("/{goalId}/progress")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ApiResponse<Void> addProgress(@PathVariable Integer goalId,
@@ -191,7 +176,6 @@ public class GoalController {
         return ApiResponse.success("Progress added");
     }
 
-    // Get progress updates
     @GetMapping("/{goalId}/progress")
     public ApiResponse<String> getProgress(@PathVariable Integer goalId) {
         String progress = goalSvc.getProgressUpdates(goalId);
@@ -200,7 +184,7 @@ public class GoalController {
 
     @GetMapping("/internal/goals/by-status/{status}")
     public ResponseEntity<ApiResponse<List<GoalSummaryDTO>>> getGoalsByStatus(@PathVariable String status) {
-        List<Goal> goals = goalSvc.getGoalsByStatus(status);
+        List<Goal> goals = goalSvc.getGoalsByStatus(GoalStatus.valueOf(status.toUpperCase()));
         List<GoalSummaryDTO> dtos = goals.stream()
                 .map(g -> new GoalSummaryDTO(g.getGoalId(), g.getTitle(), g.getStatus().name(),
                         g.getAssignedToUserId(), g.getAssignedManagerId(), g.getCreatedDate().toLocalDate()))
@@ -211,7 +195,11 @@ public class GoalController {
     @GetMapping("/internal/goals/pending-approval")
     public ResponseEntity<ApiResponse<List<GoalSummaryDTO>>> getGoalsPendingApproval(
             @RequestParam int pendingDays) {
-        // Implementation to return goals pending for more than pendingDays
+        List<Goal> goals = goalSvc.getGoalsByStatus(GoalStatus.PENDING);
+        List<GoalSummaryDTO> dtos = goals.stream()
+                .map(g -> new GoalSummaryDTO(g.getGoalId(), g.getTitle(), g.getStatus().name(),
+                        g.getAssignedToUserId(), g.getAssignedManagerId(), g.getCreatedDate().toLocalDate()))
+                .toList();
+        return ResponseEntity.ok(new ApiResponse<>("success", "Pending goals retrieved", dtos));
     }
-
 }

@@ -1,6 +1,6 @@
 package com.project.coreservice.exception;
 
-import com.project.performanceTrack.dto.ApiResponse;
+import com.project.coreservice.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

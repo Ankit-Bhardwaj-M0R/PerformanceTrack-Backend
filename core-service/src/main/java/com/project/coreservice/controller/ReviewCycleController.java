@@ -21,28 +21,24 @@ public class ReviewCycleController {
 
     private final ReviewCycleService cycleSvc;
 
-    //get all review cycles
     @GetMapping
-    public ApiResponse<List<ReviewCycle>> getAllCycles(){
+    public ApiResponse<List<ReviewCycle>> getAllCycles() {
         List<ReviewCycle> cycles = cycleSvc.getAllCycles();
         return ApiResponse.success("Review cycles retrieved", cycles);
     }
 
-    //get cycle by id
     @GetMapping("/{cycleId}")
     public ApiResponse<ReviewCycle> getCycleById(@PathVariable Integer cycleId) {
         ReviewCycle cycle = cycleSvc.getCycleById(cycleId);
         return ApiResponse.success("Review cycle retrieved", cycle);
     }
 
-    // Get active cycle
     @GetMapping("/active")
     public ApiResponse<ReviewCycle> getActiveCycle() {
         ReviewCycle cycle = cycleSvc.getActiveCycle();
         return ApiResponse.success("Active cycle retrieved", cycle);
     }
 
-    //create review cycle (Admin)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ReviewCycle> createCycle(@Valid @RequestBody CreateReviewCycleRequest req,
@@ -51,7 +47,7 @@ public class ReviewCycleController {
         ReviewCycle cycle = cycleSvc.createCycle(req, adminId);
         return ApiResponse.success("Review cycle created", cycle);
     }
-    // Update review cycle (Admin)
+
     @PutMapping("/{cycleId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<ReviewCycle> updateCycle(@PathVariable Integer cycleId,
@@ -64,7 +60,7 @@ public class ReviewCycleController {
 
     @GetMapping("/internal/review-cycles/active")
     public ResponseEntity<ApiResponse<ReviewCycleSummaryDTO>> getActiveReviewCycle() {
-        ReviewCycle cycle = cycleSvc.getActiveReviewCycle();
+        ReviewCycle cycle = cycleSvc.getActiveCycle();
         if (cycle == null) {
             return ResponseEntity.ok(new ApiResponse<>("success", "No active cycle", null));
         }
@@ -74,6 +70,4 @@ public class ReviewCycleController {
         );
         return ResponseEntity.ok(new ApiResponse<>("success", "Active cycle retrieved", dto));
     }
-
-
 }

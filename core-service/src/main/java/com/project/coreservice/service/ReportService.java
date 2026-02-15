@@ -114,7 +114,7 @@ public class ReportService {
             metrics.put("teamSize", teamSize);
             metrics.put("totalTeamGoals", teamGoals.size());
             metrics.put("pendingApprovals", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING).count());
-            metrics.put("pendingCompletions", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.AWAITING_COMPLETION_APPROVAL).count());
+            metrics.put("pendingCompletions", teamGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING_COMPLETION_APPROVAL).count());
 
         } else {
             // Admin dashboard metrics - CHANGED: Cannot get all users from AuthUserClient directly
@@ -181,7 +181,7 @@ public class ReportService {
         // Status breakdown
         long pending = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING).count();
         long inProgress = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.IN_PROGRESS).count();
-        long pendingCompletion = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.AWAITING_COMPLETION_APPROVAL).count();
+        long pendingCompletion = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.PENDING_COMPLETION_APPROVAL).count();
         long completed = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.COMPLETED).count();
         long rejected = allGoals.stream().filter(g -> g.getStatus() == GoalStatus.REJECTED).count();
 
