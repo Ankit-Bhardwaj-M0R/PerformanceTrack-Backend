@@ -16,7 +16,6 @@ spring:
       jwt:
         secret: ${JWT_SECRET:MySecretKeyForPerformanceTrackApp2026VeryLongSecretKey}
 
-
       routes:
         # ===== AUTH & USER ROUTES (auth-user-service) =====
         - id: auth-service
@@ -115,12 +114,13 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka:eureka123@localhost:8761/eureka
     register-with-eureka: true
     fetch-registry: true
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
+
 
 # Logging
 logging:
