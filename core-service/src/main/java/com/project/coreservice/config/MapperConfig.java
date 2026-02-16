@@ -1,6 +1,5 @@
 package com.project.coreservice.config;
 
-
 import com.project.coreservice.dto.FeedbackRequest;
 import com.project.coreservice.dto.FeedbackResponseDTO;
 import com.project.coreservice.entity.Feedback;
@@ -16,23 +15,25 @@ public class MapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
 
-        // 1. SET MATCHING STRATEGY TO STRICT
-        // This stops ModelMapper from guessing. It will only map if names match exactly.
+        // SET MATCHING STRATEGY TO STRICT
         mapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.STRICT);
 
-        // 2. Map Request to Entity (Skip the ID)
+        // Map Request to Entity (Skip the ID)
         mapper.typeMap(FeedbackRequest.class, Feedback.class).addMappings(m -> {
             m.skip(Feedback::setFeedbackId);
         });
 
-        // 3. Map Entity to ResponseDTO (Flattening)
+        // Map Entity to ResponseDTO
         mapper.typeMap(Feedback.class, FeedbackResponseDTO.class).addMappings(m -> {
-            // Use 'src' to avoid null pointer issues during configuration
-            m.map(src -> src.getGivenByUser().getName(), FeedbackResponseDTO::setGiverName);
-            m.map(src -> src.getGivenByUser().getUserId(), FeedbackResponseDTO::setGiverId);
-            m.map(src -> src.getGoal().getTitle(), FeedbackResponseDTO::setGoalTitle);
-            m.map(src -> src.getGoal().getGoalId(), FeedbackResponseDTO::setGoalId);
+            // Map givenByUserId to giverId
+            m.map(Feedback::getGivenByUserId, FeedbackResponseDTO::setGiverId);
+
+            // Map goal fields if goal is present
+            m.map(src -> src.getGoal() != null ? src.getGoal().getTitle() : null,
+                    FeedbackResponseDTO::setGoalTitle);
+            m.map(src -> src.getGoal() != null ? src.getGoal().getGoalId() : null,
+                    FeedbackResponseDTO::setGoalId);
         });
 
         return mapper;

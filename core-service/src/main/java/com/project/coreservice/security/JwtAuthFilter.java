@@ -1,6 +1,7 @@
 package com.project.coreservice.security;
 
-import com.project.performanceTrack.util.JwtUtil;
+
+import com.project.coreservice.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

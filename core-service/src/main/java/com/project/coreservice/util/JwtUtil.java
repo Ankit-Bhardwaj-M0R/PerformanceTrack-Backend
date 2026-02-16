@@ -1,4 +1,4 @@
-package com.project.performanceTrack.util;
+package com.project.coreservice.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
