@@ -7,6 +7,7 @@ import com.project.coreservice.entity.ReviewCycle;
 import com.project.coreservice.enums.PerformanceReviewStatus;
 import com.project.coreservice.exception.BadRequestException;
 import com.project.coreservice.exception.ResourceNotFoundException;
+import com.project.coreservice.exception.UnauthorizedException;
 import com.project.coreservice.repository.PerformanceReviewRepository;
 import com.project.coreservice.repository.ReviewCycleRepository;
 import lombok.RequiredArgsConstructor;
@@ -249,24 +250,42 @@ public class PerformanceReviewService {
     }
 
 
-//    @Transactional
-//    public PerformanceReview updateSelfAssessmentDraft(Integer reviewId, SelfAssessmentRequest req, Integer empId) {
-//        PerformanceReview review = getReviewById(reviewId);
-//
-//        if (!review.getEmployeeId().equals(empId)) {
-//            throw new BadRequestException("You can only update your own self-assessment");
-//        }
-//
-//        // Update self-assessment fields (keep as draft)
-//        review.setEmployeeSelfRating(req.getSelfRating());
-//        review.setEmployeeComments(req.getSelfComments());
-//
-//        PerformanceReview updated = reviewRepo.save(review);
-//
-//        createAuditLog(empId, "SELF_ASSESSMENT_DRAFT_UPDATED",
-//                "Updated self-assessment draft for review ID: " + reviewId,
-//                "PerformanceReview", reviewId);
-//
-//        return updated;
-//    }
+    @Transactional
+    public PerformanceReview updateSelfAssessmentDraft(Integer reviewId, SelfAssessmentRequest req, Integer empId){
+        PerformanceReview review = getReviewById(reviewId);
+
+        //check authorization
+        ApiResponse<UserSummaryDTO> userResponse = authUserClient.getUserById(review.getUserId());
+        if (userResponse == null || userResponse.getData() == null) {
+            throw new ResourceNotFoundException("Review user not found");
+        }
+
+        UserSummaryDTO user = userResponse.getData();
+        if (user.getManagerId() == null || !user.getManagerId().equals(empId)) {
+            throw new BadRequestException("You can only submit manager review for your direct reports");
+        }
+
+        // Can only update if still in pending or self-assessment status
+        if (review.getStatus() != PerformanceReviewStatus.PENDING &&
+                review.getStatus() != PerformanceReviewStatus.SELF_ASSESSMENT_COMPLETED) {
+            throw new BadRequestException("Cannot update - review already completed");
+        }
+
+        //update self assessment
+        review.setSelfAssessment((req.getSelfAssmt()));
+        review.setEmployeeSelfRating(req.getSelfRating());
+
+        //save without changing status
+        PerformanceReview updated = reviewRepo.save(review);
+
+        //auditLog
+        createAuditLog(empId, "SELF_ASSESSMENT_DRAFT_UPDATED",
+                "Updated self-assessment draft", "PerformanceReview", reviewId);
+
+
+        return updated;
+    }
+
+
+
 }

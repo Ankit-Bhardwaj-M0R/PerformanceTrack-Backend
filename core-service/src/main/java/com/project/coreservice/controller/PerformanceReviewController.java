@@ -55,6 +55,7 @@ public class PerformanceReviewController {
         return ApiResponse.success("Self-assessment submitted", review);
     }
 
+
     @PutMapping("/{reviewId}/draft")
     @PreAuthorize("hasRole('EMPLOYEE')")
     public ApiResponse<PerformanceReview> updateDraft(@PathVariable Integer reviewId,
@@ -85,6 +86,7 @@ public class PerformanceReviewController {
         PerformanceReview review = reviewSvc.acknowledgeReview(reviewId, empId, response);
         return ApiResponse.success("Review acknowledged", review);
     }
+
 
 
 }

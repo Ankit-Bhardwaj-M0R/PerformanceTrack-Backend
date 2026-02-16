@@ -72,3 +72,24 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 }
+
+
+//
+//        The Request Lifecycle
+//        Client Request (with JWT Header) ↓ [ Filter 1: SecurityContextPersistenceFilter ]
+//
+//        Checks if a user was already stored in a session (Since you use JWT, this is usually empty). ↓ [ Filter 2: LogoutFilter ]
+//
+//        Checks if the URL is /logout. ↓ [ Filter 3: Your Custom JwtAuthenticationFilter ]
+//
+//        The email != null check: Extracts the identity from the token.
+//
+//        The getAuthentication() == null check: Ensures no previous filter has already logged someone in.
+//
+//        The "Set" Action: If both pass, it places the user into the SecurityContextHolder. ↓ [ Filter 4: ExceptionTranslationFilter ]
+//
+//        A "safety net" that catches security errors and turns them into HTTP responses (like 401 Unauthorized). ↓ [ Filter 5: AuthorizationFilter (FilterSecurityInterceptor) ]
+//
+//        The final gate. It looks at the ROLE_ADMIN or ROLE_USER inside your SecurityContextHolder and compares it to the permissions required for the URL. ↓ [ Your @RestController ]
+//
+//        The request is finally safe to execute your business logic.

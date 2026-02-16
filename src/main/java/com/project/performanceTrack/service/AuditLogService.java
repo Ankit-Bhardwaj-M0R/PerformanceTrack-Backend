@@ -71,4 +71,6 @@ public class AuditLogService {
             return auditRepo.findAll(pageable);  // JpaRepository already has this
         }
     }
+
+
 }
