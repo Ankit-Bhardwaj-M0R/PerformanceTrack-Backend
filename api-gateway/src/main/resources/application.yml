@@ -1,0 +1,129 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      # Enable discovery locator to automatically create routes for all services
+      discovery:
+        locator:
+          enabled: false  # We define routes manually for better control
+
+      # JWT Configuration
+      jwt:
+        secret: ${JWT_SECRET:MySecretKeyForPerformanceTrackApp2026VeryLongSecretKey}
+
+
+      routes:
+        # ===== AUTH & USER ROUTES (auth-user-service) =====
+        - id: auth-service
+          uri: lb://auth-user-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - RewritePath=/api/v1/auth/(?<segment>.*), /api/v1/auth/${segment}
+
+        - id: user-service
+          uri: lb://auth-user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - RewritePath=/api/v1/users/(?<segment>.*), /api/v1/users/${segment}
+
+        - id: audit-log-service
+          uri: lb://auth-user-service
+          predicates:
+            - Path=/api/v1/audit-logs/**
+          filters:
+            - RewritePath=/api/v1/audit-logs/(?<segment>.*), /api/v1/audit-logs/${segment}
+
+        # ===== NOTIFICATION ROUTES (notification-service) =====
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - RewritePath=/api/v1/notifications/(?<segment>.*), /api/v1/notifications/${segment}
+
+        # ===== CORE SERVICE ROUTES (core-service) =====
+        - id: goal-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/v1/goals/**
+          filters:
+            - RewritePath=/api/v1/goals/(?<segment>.*), /api/v1/goals/${segment}
+
+        - id: performance-review-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/v1/performance-reviews/**
+          filters:
+            - RewritePath=/api/v1/performance-reviews/(?<segment>.*), /api/v1/performance-reviews/${segment}
+
+        - id: review-cycle-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/v1/review-cycles/**
+          filters:
+            - RewritePath=/api/v1/review-cycles/(?<segment>.*), /api/v1/review-cycles/${segment}
+
+        - id: feedback-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/v1/feedback/**
+          filters:
+            - RewritePath=/api/v1/feedback/(?<segment>.*), /api/v1/feedback/${segment}
+
+        - id: report-service
+          uri: lb://core-service
+          predicates:
+            - Path=/api/v1/reports/**
+          filters:
+            - RewritePath=/api/v1/reports/(?<segment>.*), /api/v1/reports/${segment}
+
+        # ===== BLOCK INTERNAL ENDPOINTS =====
+        # This MUST come last in the route list to catch /internal/** before other routes
+        - id: block-internal-endpoints
+          uri: no://op
+          predicates:
+            - Path=/internal/**
+          filters:
+            - SetStatus=403
+
+      # Global CORS configuration
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins:
+              - "http://localhost:3000"
+              - "http://localhost:3001"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
