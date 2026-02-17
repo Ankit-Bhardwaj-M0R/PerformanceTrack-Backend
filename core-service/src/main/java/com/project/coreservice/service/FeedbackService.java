@@ -32,6 +32,9 @@ public class FeedbackService {
     /**
      * Retrieves a list of feedback records filtered by Goal ID or Review ID
      */
+    /**
+     * Retrieves a list of feedback records filtered by Goal ID or Review ID
+     */
     public List<FeedbackResponseDTO> getFilteredFeedback(Integer goalId, Integer reviewId) {
         List<Feedback> feedbackList;
         if (goalId != null) feedbackList = fbRepo.findByGoal_GoalId(goalId);
@@ -39,10 +42,30 @@ public class FeedbackService {
         else feedbackList = fbRepo.findAll();
 
         return feedbackList.stream()
-                .map(fb -> modelMapper.map(fb, FeedbackResponseDTO.class))
+                .map(fb -> {
+                    FeedbackResponseDTO dto = modelMapper.map(fb, FeedbackResponseDTO.class);
+
+                    // Fetch giver name from AuthUserClient
+                    if (fb.getGivenByUserId() != null) {
+                        try {
+                            ApiResponse<UserSummaryDTO> userResponse = authUserClient.getUserById(fb.getGivenByUserId());
+                            if (userResponse != null && userResponse.getData() != null) {
+                                dto.setGiverName(userResponse.getData().getName());
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to fetch user name for userId: {}", fb.getGivenByUserId());
+                        }
+                    }
+
+                    return dto;
+                })
                 .toList();
     }
 
+
+    /**
+     * Persists a new feedback entry
+     */
     /**
      * Persists a new feedback entry
      */
@@ -53,6 +76,7 @@ public class FeedbackService {
         if (userResponse == null || userResponse.getData() == null) {
             throw new ResourceNotFoundException("User not found");
         }
+        UserSummaryDTO user = userResponse.getData();
 
         // Map request to entity
         Feedback fb = modelMapper.map(request, Feedback.class);
@@ -78,8 +102,13 @@ public class FeedbackService {
                 "Created feedback for " + (request.getGoalId() != null ? "Goal ID: " + request.getGoalId() : "Review ID: " + request.getReviewId()),
                 "Feedback", savedFb.getFeedbackId());
 
-        return modelMapper.map(savedFb, FeedbackResponseDTO.class);
+        // Map to response DTO and populate giver name
+        FeedbackResponseDTO responseDTO = modelMapper.map(savedFb, FeedbackResponseDTO.class);
+        responseDTO.setGiverName(user.getName());
+
+        return responseDTO;
     }
+
 
     // CHANGED: Helper method to create audit logs via AuthUserClient
     private void createAuditLog(Integer userId, String action, String details, String entityType, Integer entityId) {
