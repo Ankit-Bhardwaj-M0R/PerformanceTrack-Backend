@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8092
 
 spring:
   application:
@@ -119,7 +119,7 @@ eureka:
     fetch-registry: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
+    instance-id: ${spring.application.name:discovery-server}:${server.port:8761}
 
 
 # Logging
