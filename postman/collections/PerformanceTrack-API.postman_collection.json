@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
     "name": "PerformanceTrack API",
-    "description": "Complete API collection for PerformanceTrack Backend.\n\nRun the Setup folder first to populate auth tokens, then run folders top-to-bottom for a full integration test.",
+    "description": "Complete API collection for PerformanceTrack Backend.\n\nRun the Setup folder first to populate auth tokens, then run folders top-to-bottom for a full integration test.\n\n### BUG FIXES APPLIED (vs original collection)\n1. Port corrected to 8092 (API Gateway port, not 8080).\n2. Goals > Lifecycle: Added 'Create Goal for Deletion' request; Delete Goal now uses {{delete_goal_id}} instead of hardcoded ID 8 (which belonged to Arjun, not the logged-in employee — would have returned 403).\n3. Performance Reviews > Submit Manager Review: Now uses {{created_review_id}} so the manager reviews the review created in this test run rather than hardcoded seed review 2 (Anita's review).\n4. Performance Reviews > Acknowledge Review: Now uses {{created_review_id}} with the employee token (Rahul), fixing a 403 that would occur because review 2 belongs to Anita.\n5. Notifications: Added missing SSE Notification Stream request.\n6. Environment: Added delete_goal_id variable.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -343,7 +343,7 @@
       "item": [
         {
           "name": "Lifecycle",
-          "description": "Basic CRUD operations for goals.",
+          "description": "CRUD operations for goals. Create two goals: one for the full lifecycle flow (created_goal_id) and one to test deletion (delete_goal_id).",
           "auth": {
             "type": "bearer",
             "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
@@ -382,6 +382,48 @@
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"title\": \"Improve API Test Coverage\",\n  \"desc\": \"Increase unit and integration test coverage for all REST endpoints to at least 80%\",\n  \"cat\": \"TECHNICAL\",\n  \"pri\": \"HIGH\",\n  \"startDt\": \"2026-02-10\",\n  \"endDt\": \"2026-04-30\",\n  \"mgrId\": {{manager_id}}\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/goals",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "goals"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Create Goal (for deletion test)",
+              "description": "FIX: Creates a second goal owned by Rahul specifically to be deleted. Saves delete_goal_id. The original collection used hardcoded goal ID 8 (Arjun's goal) with Rahul's token — that would return 403 because Rahul cannot delete another employee's goal.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test('Deletion goal created', function () {",
+                      "    const res = pm.response.json();",
+                      "    pm.expect(res.status).to.eql('success');",
+                      "    pm.expect(res.data).to.have.property('goalId');",
+                      "    pm.expect(res.data.status).to.eql('PENDING');",
+                      "    pm.environment.set('delete_goal_id', res.data.goalId);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Goal to be deleted\",\n  \"desc\": \"This goal is created solely to test the DELETE endpoint.\",\n  \"cat\": \"PERSONAL\",\n  \"pri\": \"LOW\",\n  \"startDt\": \"2026-03-01\",\n  \"endDt\": \"2026-03-31\",\n  \"mgrId\": {{manager_id}}\n}",
                   "options": { "raw": { "language": "json" } }
                 },
                 "url": {
@@ -507,7 +549,7 @@
             },
             {
               "name": "Delete Goal",
-              "description": "Soft-deletes a goal. Uses seed goal 8 (Arjun's low-priority goal) to avoid breaking the lifecycle flow.",
+              "description": "FIX: Deletes {{delete_goal_id}} which is a goal created by Rahul in this test run. The original collection used hardcoded ID 8 (Arjun's goal) with Rahul's employee token — that would return 403 since Rahul cannot delete another employee's goal.",
               "event": [
                 {
                   "listen": "test",
@@ -530,9 +572,9 @@
                 "method": "DELETE",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/goals/8",
+                  "raw": "{{base_url}}/api/v1/goals/{{delete_goal_id}}",
                   "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "goals", "8"]
+                  "path": ["api", "v1", "goals", "{{delete_goal_id}}"]
                 }
               },
               "response": []
@@ -623,7 +665,7 @@
         },
         {
           "name": "Completion",
-          "description": "Goal completion workflow: employee submits → manager approves/rejects.",
+          "description": "Goal completion workflow: employee submits → manager verifies evidence → manager approves/rejects.",
           "auth": {
             "type": "bearer",
             "bearer": [{ "key": "token", "value": "{{manager_token}}", "type": "string" }]
@@ -851,7 +893,7 @@
           "item": [
             {
               "name": "Add Progress Update",
-              "description": "Employee adds a progress note. Uses seed goal 2 (Anita's in-progress goal) with employee token override for Rahul's own goal.",
+              "description": "Employee adds a progress note to the approved goal.",
               "event": [
                 {
                   "listen": "test",
@@ -1114,7 +1156,7 @@
     },
     {
       "name": "Performance Reviews",
-      "description": "Self-assessment and manager review workflow.",
+      "description": "Self-assessment and manager review workflow. The flow: Rahul submits self-assessment → manager (Priya) reviews it → Rahul acknowledges. All three steps use {{created_review_id}} so they chain correctly.",
       "auth": {
         "type": "bearer",
         "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
@@ -1227,7 +1269,7 @@
         },
         {
           "name": "Submit Self-Assessment",
-          "description": "Employee submits self-assessment for the active Q1 2026 cycle. Saves review ID.",
+          "description": "Employee (Rahul) submits self-assessment for the active Q1 2026 cycle. Saves review ID as {{created_review_id}} for the manager-review and acknowledge steps.",
           "event": [
             {
               "listen": "test",
@@ -1307,7 +1349,7 @@
         },
         {
           "name": "Submit Manager Review",
-          "description": "Manager reviews and rates the employee's self-assessment. Uses seed review 2 (Anita's self-assessment completed).",
+          "description": "FIX: Manager (Priya) reviews {{created_review_id}} — Rahul's review submitted in this test run. The original collection used hardcoded review ID 2 (Anita's review). While the manager could review Anita's review, it breaks the end-to-end flow because the subsequent Acknowledge step (Rahul's token) would then try to acknowledge a review that belongs to Anita, causing a 403.",
           "event": [
             {
               "listen": "test",
@@ -1337,20 +1379,20 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"mgrFb\": \"Anita has shown consistent improvement this quarter. Her work on the automated testing framework has been valuable to the team. Areas for growth include cross-team collaboration and presenting technical work to stakeholders.\",\n  \"mgrRating\": 4,\n  \"ratingJust\": \"Exceeded expectations on technical deliverables, met expectations on collaboration goals.\",\n  \"compRec\": \"Recommend 8% salary adjustment based on market data and performance.\",\n  \"nextGoals\": \"1. Lead a cross-team initiative 2. Present at engineering all-hands 3. Expand testing framework to cover E2E scenarios\"\n}",
+              "raw": "{\n  \"mgrFb\": \"Rahul has shown consistent improvement this quarter. His work on the automated testing framework has been valuable to the team. Areas for growth include cross-team collaboration and presenting technical work to stakeholders.\",\n  \"mgrRating\": 4,\n  \"ratingJust\": \"Exceeded expectations on technical deliverables, met expectations on collaboration goals.\",\n  \"compRec\": \"Recommend 8% salary adjustment based on market data and performance.\",\n  \"nextGoals\": \"1. Lead a cross-team initiative 2. Present at engineering all-hands 3. Expand testing framework to cover E2E scenarios\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/performance-reviews/2",
+              "raw": "{{base_url}}/api/v1/performance-reviews/{{created_review_id}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "performance-reviews", "2"]
+              "path": ["api", "v1", "performance-reviews", "{{created_review_id}}"]
             }
           },
           "response": []
         },
         {
           "name": "Acknowledge Review",
-          "description": "Employee acknowledges a completed review. Uses seed review 1 (Rahul's completed review) — may already be acknowledged.",
+          "description": "FIX: Employee (Rahul) acknowledges {{created_review_id}} — the review that Rahul submitted and the manager just reviewed. The original collection used hardcoded review ID 2 (Anita's review) with Rahul's employee token, which would return 403 because Rahul cannot acknowledge a review that belongs to Anita.",
           "event": [
             {
               "listen": "test",
@@ -1380,9 +1422,9 @@
               "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/performance-reviews/2/acknowledge",
+              "raw": "{{base_url}}/api/v1/performance-reviews/{{created_review_id}}/acknowledge",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "performance-reviews", "2", "acknowledge"]
+              "path": ["api", "v1", "performance-reviews", "{{created_review_id}}", "acknowledge"]
             }
           },
           "response": []
@@ -1667,6 +1709,23 @@
                 { "key": "page", "value": "0" },
                 { "key": "size", "value": "10" }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "SSE Notification Stream",
+          "description": "NEW: Opens a Server-Sent Events (SSE) connection for real-time notification push. This endpoint returns a stream (text/event-stream), not a JSON body. In Postman, send the request and watch the response — events will arrive as they are emitted by the server. The connection stays open until the client disconnects. NOTE: Postman's test scripts do not run for SSE responses; manual inspection is required.",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "text/event-stream" },
+              { "key": "Cache-Control", "value": "no-cache" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/stream",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "notifications", "stream"]
             }
           },
           "response": []
@@ -2222,7 +2281,7 @@
     },
     {
       "name": "Auth",
-      "description": "Password change and logout. Run these last since logout invalidates the session.",
+      "description": "Password change and logout. Run these last since logout invalidates the session. NOTE: After running Change Password (employee123 → employee456), the employee_token will still be valid for its JWT lifetime but re-login will require employee456. Manually reset the password or re-seed the DB before re-running the collection.",
       "auth": {
         "type": "bearer",
         "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
@@ -2418,15 +2477,122 @@
                 }
               },
               "response": []
-            },
+            }
+          ]
+        },
+        {
+          "name": "Authorization Errors",
+          "description": "Role-based access control failure scenarios.",
+          "item": [
             {
-              "name": "Access Endpoint without Token",
+              "name": "Employee cannot access all users",
+              "description": "Only ADMIN/MANAGER can list all users.",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "pm.test('Returns 401 or 403 without token', function () {",
+                      "pm.test('Access denied for employee', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Employee cannot create user",
+              "description": "Only ADMIN can create users.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Access denied for employee', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
+                },
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Hack User\",\n  \"email\": \"hack@company.com\",\n  \"password\": \"hack123\",\n  \"role\": \"ADMIN\",\n  \"dept\": \"Engineering\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Employee cannot approve own goal",
+              "description": "Only MANAGER can approve goals.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Access denied for employee', function () {",
+                      "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/goals/{{created_goal_id}}/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "goals", "{{created_goal_id}}", "approve"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Unauthenticated request rejected",
+              "description": "Request without a Bearer token should be rejected.",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Unauthenticated request rejected', function () {",
                       "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
                       "});"
                     ],
@@ -2439,528 +2605,9 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Access Endpoint with Invalid Token",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 401 or 403 with invalid token', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "invalid.jwt.token.here", "type": "string" }]
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "Authorization Errors",
-          "description": "Role-based access control violations.",
-          "auth": {
-            "type": "bearer",
-            "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-          },
-          "item": [
-            {
-              "name": "Employee → Create User (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot create users', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Unauthorized User\",\n  \"email\": \"unauth@company.com\",\n  \"password\": \"test123\",\n  \"role\": \"EMPLOYEE\",\n  \"dept\": \"Engineering\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Employee → Approve Goal (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot approve goals', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/goals/1/approve",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "goals", "1", "approve"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Employee → Create Review Cycle (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot create review cycles', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Unauthorized Cycle\",\n  \"startDt\": \"2026-07-01\",\n  \"endDt\": \"2026-09-30\",\n  \"status\": \"DRAFT\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/review-cycles",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "review-cycles"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Employee → Get Audit Logs (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot access audit logs', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/audit-logs",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "audit-logs"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Employee → Generate Report (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot generate reports', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"scope\": \"Unauthorized Report\",\n  \"metrics\": \"test\",\n  \"format\": \"PDF\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/reports/generate",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "reports", "generate"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Employee → Submit Manager Review (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Employee cannot submit manager reviews', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "method": "PUT",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"mgrFb\": \"Unauthorized feedback\",\n  \"mgrRating\": 3\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/performance-reviews/2",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "performance-reviews", "2"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Manager → Create User (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Manager cannot create users', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{manager_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Unauthorized User\",\n  \"email\": \"unauth2@company.com\",\n  \"password\": \"test123\",\n  \"role\": \"EMPLOYEE\",\n  \"dept\": \"Engineering\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Manager → Get Audit Logs (403)",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Manager cannot access audit logs', function () {",
-                      "    pm.expect(pm.response.code).to.eql(403);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{manager_token}}", "type": "string" }]
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/audit-logs",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "audit-logs"]
-                }
-              },
-              "response": []
-            }
-          ]
-        },
-        {
-          "name": "Validation Errors",
-          "description": "Missing or invalid request body fields.",
-          "item": [
-            {
-              "name": "Create User - Missing Required Fields",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for missing fields', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Incomplete User\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create User - Invalid Email",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for invalid email', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"name\": \"Bad Email User\",\n  \"email\": \"not-an-email\",\n  \"password\": \"test123\",\n  \"role\": \"EMPLOYEE\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/users",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "users"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create Goal - Missing Title",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for missing title', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"desc\": \"Missing the title field\",\n  \"cat\": \"TECHNICAL\",\n  \"pri\": \"HIGH\",\n  \"startDt\": \"2026-03-01\",\n  \"endDt\": \"2026-06-30\",\n  \"mgrId\": {{manager_id}}\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
                   "raw": "{{base_url}}/api/v1/goals",
                   "host": ["{{base_url}}"],
                   "path": ["api", "v1", "goals"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create Goal - Missing All Fields",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for empty body', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/goals",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "goals"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Create Review Cycle - Missing Fields",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for missing fields', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Incomplete Cycle\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/review-cycles",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "review-cycles"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Submit Self-Assessment - Missing Rating",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 400 for missing rating', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([400, 422]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
-                "method": "POST",
-                "header": [
-                  { "key": "Content-Type", "value": "application/json" }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"cycleId\": 1,\n  \"selfAssmt\": \"Missing the rating field\"\n}",
-                  "options": { "raw": { "language": "json" } }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/performance-reviews",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "performance-reviews"]
                 }
               },
               "response": []
@@ -2969,17 +2616,26 @@
         },
         {
           "name": "Not Found Errors",
-          "description": "Requesting resources that do not exist.",
+          "description": "Resource not found scenarios.",
+          "auth": {
+            "type": "bearer",
+            "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
+          },
           "item": [
             {
-              "name": "Get User - Invalid ID",
+              "name": "Get Non-existent User",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "pm.test('Returns 404 for non-existent user', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+                      "pm.test('Returns 404', function () {",
+                      "    pm.expect(pm.response.code).to.eql(404);",
+                      "});",
+                      "",
+                      "pm.test('Error response returned', function () {",
+                      "    const res = pm.response.json();",
+                      "    pm.expect(res.status).to.eql('error');",
                       "});"
                     ],
                     "type": "text/javascript"
@@ -2987,10 +2643,6 @@
                 }
               ],
               "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
-                },
                 "method": "GET",
                 "header": [],
                 "url": {
@@ -3002,14 +2654,19 @@
               "response": []
             },
             {
-              "name": "Get Goal - Invalid ID",
+              "name": "Get Non-existent Goal",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "pm.test('Returns 404 for non-existent goal', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+                      "pm.test('Returns 404', function () {",
+                      "    pm.expect(pm.response.code).to.eql(404);",
+                      "});",
+                      "",
+                      "pm.test('Error response returned', function () {",
+                      "    const res = pm.response.json();",
+                      "    pm.expect(res.status).to.eql('error');",
                       "});"
                     ],
                     "type": "text/javascript"
@@ -3017,10 +2674,6 @@
                 }
               ],
               "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
                 "method": "GET",
                 "header": [],
                 "url": {
@@ -3032,14 +2685,19 @@
               "response": []
             },
             {
-              "name": "Get Review - Invalid ID",
+              "name": "Get Non-existent Review Cycle",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "pm.test('Returns 404 for non-existent review', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
+                      "pm.test('Returns 404', function () {",
+                      "    pm.expect(pm.response.code).to.eql(404);",
+                      "});",
+                      "",
+                      "pm.test('Error response returned', function () {",
+                      "    const res = pm.response.json();",
+                      "    pm.expect(res.status).to.eql('error');",
                       "});"
                     ],
                     "type": "text/javascript"
@@ -3047,76 +2705,12 @@
                 }
               ],
               "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/performance-reviews/99999",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "performance-reviews", "99999"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Get Review Cycle - Invalid ID",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 404 for non-existent cycle', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{admin_token}}", "type": "string" }]
-                },
                 "method": "GET",
                 "header": [],
                 "url": {
                   "raw": "{{base_url}}/api/v1/review-cycles/99999",
                   "host": ["{{base_url}}"],
                   "path": ["api", "v1", "review-cycles", "99999"]
-                }
-              },
-              "response": []
-            },
-            {
-              "name": "Mark Non-existent Notification as Read",
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "pm.test('Returns 404 for non-existent notification', function () {",
-                      "    pm.expect(pm.response.code).to.be.oneOf([404, 400]);",
-                      "});"
-                    ],
-                    "type": "text/javascript"
-                  }
-                }
-              ],
-              "request": {
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [{ "key": "token", "value": "{{employee_token}}", "type": "string" }]
-                },
-                "method": "PUT",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/notifications/99999",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "v1", "notifications", "99999"]
                 }
               },
               "response": []
