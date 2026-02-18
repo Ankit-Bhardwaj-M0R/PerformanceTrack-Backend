@@ -261,7 +261,7 @@ public class PerformanceReviewService {
         }
 
         UserSummaryDTO user = userResponse.getData();
-        if (user.getManagerId() == null || !user.getManagerId().equals(empId)) {
+        if (user.getManagerId() == null || !user.getUserId().equals(empId)) {
             throw new BadRequestException("You can only submit manager review for your direct reports");
         }
 

@@ -48,7 +48,7 @@ VALUES (5, 'Anita Desai', 'anita@company.com',
 -- Employee 3: Vikram Singh - QA Engineer (ID: 6)
 INSERT INTO users (user_id, name, email, password_hash, role, department, manager_id, status, created_date, last_modified_date)
 VALUES (6, 'Vikram Singh', 'vikram@company.com',
-        '$2a$12$99tF8GiIxfpak3KaFlY2BO0PHDHy5u8SwkAZZNSGMHi9GSVZ3Ox5e',
+        '$2a$12$rXOOqlWY0sWrYr.mF.YwTezBp108y2Eh5KQBIbm2OVqe.0uBtQYAK',
         'EMPLOYEE', 'Engineering', 2, 'ACTIVE', '2025-12-01 10:10:00', '2025-12-01 10:10:00');
 
 -- Employee 4: Meera Reddy - HR Specialist (ID: 7)
