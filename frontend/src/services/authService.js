@@ -34,7 +34,7 @@ const authService = {
    */
   changePassword: async (currentPassword, newPassword) => {
     const response = await api.put('/auth/change-password', {
-      currentPassword,
+      oldPassword: currentPassword,  // backend reads body.get("oldPassword")
       newPassword,
     })
     return response.data

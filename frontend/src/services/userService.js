@@ -26,19 +26,37 @@ const userService = {
   /**
    * POST /api/v1/users
    * Create a new user (ADMIN only).
-   * Body: { name, email, password, role, department, managerId }
+   * Backend CreateUserRequest fields: name, email, password, role, dept, mgrId, status
    */
   createUser: async (userData) => {
-    const response = await api.post('/users', userData)
+    const response = await api.post('/users', {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+      role: userData.role,
+      dept: userData.department,
+      mgrId: userData.managerId ? parseInt(userData.managerId) : null,
+      status: userData.status || 'ACTIVE',
+    })
     return response.data
   },
 
   /**
    * PUT /api/v1/users/{userId}
    * Update an existing user (ADMIN only).
+   * Backend CreateUserRequest fields: name, email, password, role, dept, mgrId, status
    */
   updateUser: async (userId, userData) => {
-    const response = await api.put(`/users/${userId}`, userData)
+    const body = {
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      dept: userData.department,
+      mgrId: userData.managerId ? parseInt(userData.managerId) : null,
+      status: userData.status || 'ACTIVE',
+    }
+    if (userData.password) body.password = userData.password
+    const response = await api.put(`/users/${userId}`, body)
     return response.data
   },
 

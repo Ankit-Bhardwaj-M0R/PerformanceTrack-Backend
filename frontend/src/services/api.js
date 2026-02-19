@@ -27,9 +27,25 @@ api.interceptors.request.use(
 )
 
 // ─── RESPONSE INTERCEPTOR ────────────────────────────────────────────────────
-// Handle global errors (like 401 Unauthorized → redirect to login)
+// 1. Auto-unwrap the backend's ApiResponse<T> envelope so every service gets
+//    the inner `data` field directly instead of { status, msg, data }.
+// 2. Redirect to /login on 401 Unauthorized.
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Every backend endpoint returns ApiResponse<T> = { status, msg, data }
+    // Unwrap it so callers receive T directly via response.data
+    const body = response.data
+    if (
+      body !== null &&
+      typeof body === 'object' &&
+      typeof body.status === 'string' &&
+      'data' in body &&
+      typeof body.msg === 'string'
+    ) {
+      return { ...response, data: body.data }
+    }
+    return response
+  },
   (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid — clear storage and redirect to login

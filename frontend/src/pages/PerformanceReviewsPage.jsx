@@ -103,7 +103,7 @@ export default function PerformanceReviewsPage() {
       setShowSelfAssessmentModal(false)
       loadData()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Submission failed')
+      toast.error(err.response?.data?.msg || 'Submission failed')
     } finally {
       setSubmitting(false)
     }
@@ -123,7 +123,7 @@ export default function PerformanceReviewsPage() {
       setShowManagerReviewModal(false)
       loadData()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Submission failed')
+      toast.error(err.response?.data?.msg || 'Submission failed')
     } finally {
       setSubmitting(false)
     }
@@ -142,7 +142,7 @@ export default function PerformanceReviewsPage() {
       setShowAcknowledgeModal(false)
       loadData()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to acknowledge')
+      toast.error(err.response?.data?.msg || 'Failed to acknowledge')
     } finally {
       setSubmitting(false)
     }
@@ -437,12 +437,12 @@ function ReviewCard({ review, user, isManager, isEmployee, onManagerReview, onAc
           <button onClick={onView} className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1">
             <Eye size={14} /> View
           </button>
-          {isManager && review.status === 'SUBMITTED' && (
+          {isManager && review.status === 'SELF_ASSESSMENT_COMPLETED' && (
             <button onClick={onManagerReview} className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1">
               <ClipboardList size={14} /> Review
             </button>
           )}
-          {isEmployee && isMyReview && review.status === 'SUBMITTED' && review.managerFeedback && (
+          {isEmployee && isMyReview && review.status === 'MANAGER_REVIEW_COMPLETED' && (
             <button onClick={onAcknowledge} className="btn-success text-xs py-1.5 px-3 flex items-center gap-1">
               <CheckCircle size={14} /> Acknowledge
             </button>

@@ -39,19 +39,36 @@ const goalService = {
   /**
    * POST /api/v1/goals
    * Create a new goal (EMPLOYEE only).
-   * Body: { title, description, category, priority, startDate, endDate, assignedManagerId }
+   * Backend CreateGoalRequest fields: title, desc, cat, pri, startDt, endDt, mgrId
    */
   createGoal: async (goalData) => {
-    const response = await api.post('/goals', goalData)
+    const response = await api.post('/goals', {
+      title: goalData.title,
+      desc: goalData.description,
+      cat: goalData.category,
+      pri: goalData.priority,
+      startDt: goalData.startDate || null,
+      endDt: goalData.endDate || null,
+      mgrId: goalData.assignedManagerId ? parseInt(goalData.assignedManagerId) : null,
+    })
     return response.data
   },
 
   /**
    * PUT /api/v1/goals/{goalId}
    * Update a goal (EMPLOYEE, only when goal is in PENDING or requested_changes state).
+   * Backend CreateGoalRequest fields: title, desc, cat, pri, startDt, endDt, mgrId
    */
   updateGoal: async (goalId, goalData) => {
-    const response = await api.put(`/goals/${goalId}`, goalData)
+    const response = await api.put(`/goals/${goalId}`, {
+      title: goalData.title,
+      desc: goalData.description,
+      cat: goalData.category,
+      pri: goalData.priority,
+      startDt: goalData.startDate || null,
+      endDt: goalData.endDate || null,
+      mgrId: goalData.assignedManagerId ? parseInt(goalData.assignedManagerId) : null,
+    })
     return response.data
   },
 
@@ -88,41 +105,41 @@ const goalService = {
   /**
    * POST /api/v1/goals/{goalId}/approve-completion
    * Manager approves the goal completion.
-   * Body: { comments }
+   * Backend ApproveCompletionRequest field: mgrComments
    */
   approveCompletion: async (goalId, comments) => {
-    const response = await api.post(`/goals/${goalId}/approve-completion`, { comments })
+    const response = await api.post(`/goals/${goalId}/approve-completion`, { mgrComments: comments })
     return response.data
   },
 
   /**
    * POST /api/v1/goals/{goalId}/reject-completion
    * Manager rejects the completion request.
-   * Body: { comments }
+   * Backend reads body.get("reason")
    */
   rejectCompletion: async (goalId, comments) => {
-    const response = await api.post(`/goals/${goalId}/reject-completion`, { comments })
+    const response = await api.post(`/goals/${goalId}/reject-completion`, { reason: comments })
     return response.data
   },
 
   /**
    * POST /api/v1/goals/{goalId}/request-additional-evidence
    * Manager requests more evidence before approving completion.
-   * Body: { message }
+   * Backend reads body.get("reason")
    */
   requestAdditionalEvidence: async (goalId, message) => {
-    const response = await api.post(`/goals/${goalId}/request-additional-evidence`, { message })
+    const response = await api.post(`/goals/${goalId}/request-additional-evidence`, { reason: message })
     return response.data
   },
 
   /**
    * PUT /api/v1/goals/{goalId}/evidence/verify
    * Manager verifies the submitted evidence.
-   * Body: { verificationStatus, notes }
+   * Backend reads body.get("status") and body.get("notes")
    */
   verifyEvidence: async (goalId, verificationStatus, notes) => {
     const response = await api.put(`/goals/${goalId}/evidence/verify`, {
-      verificationStatus,
+      status: verificationStatus,
       notes,
     })
     return response.data
@@ -133,12 +150,11 @@ const goalService = {
   /**
    * POST /api/v1/goals/{goalId}/progress
    * Add a progress update to a goal (EMPLOYEE).
-   * Body: { notes, progressPercentage }
+   * Backend reads body.get("note") — singular, not "notes"
    */
   addProgress: async (goalId, notes, progressPercentage) => {
     const response = await api.post(`/goals/${goalId}/progress`, {
-      notes,
-      progressPercentage,
+      note: notes,
     })
     return response.data
   },
@@ -155,10 +171,14 @@ const goalService = {
   /**
    * POST /api/v1/goals/{goalId}/submit-completion
    * Employee submits their goal for completion approval.
-   * Body: { completionNotes, evidenceLink, evidenceLinkDescription }
+   * Backend SubmitCompletionRequest fields: evLink, linkDesc, compNotes
    */
   submitCompletion: async (goalId, completionData) => {
-    const response = await api.post(`/goals/${goalId}/submit-completion`, completionData)
+    const response = await api.post(`/goals/${goalId}/submit-completion`, {
+      evLink: completionData.evidenceLink,
+      linkDesc: completionData.evidenceLinkDescription,
+      compNotes: completionData.completionNotes,
+    })
     return response.data
   },
 }

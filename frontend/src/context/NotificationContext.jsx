@@ -44,7 +44,7 @@ export function NotificationProvider({ children }) {
       setLoading(true)
       const data = await notificationService.getNotifications(0, 50)
       // The API returns paginated data: { content: [...], totalElements, ... }
-      const notifList = data.content || data || []
+      const notifList = data?.content || data || []
       setNotifications(notifList)
       // Count how many are unread
       setUnreadCount(notifList.filter((n) => n.status === 'UNREAD').length)

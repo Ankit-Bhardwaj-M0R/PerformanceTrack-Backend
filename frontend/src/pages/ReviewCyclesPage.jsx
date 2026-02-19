@@ -75,7 +75,7 @@ export default function ReviewCyclesPage() {
     setSubmitting(true)
     try {
       if (editCycle) {
-        await reviewCycleService.updateCycle(editCycle.cycleId, form)
+        await reviewCycleService.updateCycle(editCycle.cycleId, form, editCycle.status)
         toast.success('Review cycle updated!')
       } else {
         await reviewCycleService.createCycle(form)
@@ -84,7 +84,7 @@ export default function ReviewCyclesPage() {
       setShowModal(false)
       loadCycles()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Operation failed')
+      toast.error(err.response?.data?.msg || 'Operation failed')
     } finally {
       setSubmitting(false)
     }

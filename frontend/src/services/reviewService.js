@@ -37,19 +37,35 @@ export const reviewCycleService = {
   /**
    * POST /api/v1/review-cycles
    * Create a new review cycle (ADMIN only).
-   * Body: { title, startDate, endDate, requiresCompletionApproval, evidenceRequired }
+   * Backend CreateReviewCycleRequest fields: title, startDt, endDt, status, reqCompAppr, evReq
    */
   createCycle: async (cycleData) => {
-    const response = await api.post('/review-cycles', cycleData)
+    const response = await api.post('/review-cycles', {
+      title: cycleData.title,
+      startDt: cycleData.startDate,
+      endDt: cycleData.endDate,
+      status: 'UPCOMING',
+      reqCompAppr: cycleData.requiresCompletionApproval,
+      evReq: cycleData.evidenceRequired,
+    })
     return response.data
   },
 
   /**
    * PUT /api/v1/review-cycles/{cycleId}
    * Update a review cycle (ADMIN only).
+   * Backend CreateReviewCycleRequest fields: title, startDt, endDt, status, reqCompAppr, evReq
+   * existingStatus: the current status of the cycle (preserved on update)
    */
-  updateCycle: async (cycleId, cycleData) => {
-    const response = await api.put(`/review-cycles/${cycleId}`, cycleData)
+  updateCycle: async (cycleId, cycleData, existingStatus = 'UPCOMING') => {
+    const response = await api.put(`/review-cycles/${cycleId}`, {
+      title: cycleData.title,
+      startDt: cycleData.startDate,
+      endDt: cycleData.endDate,
+      status: existingStatus,
+      reqCompAppr: cycleData.requiresCompletionApproval,
+      evReq: cycleData.evidenceRequired,
+    })
     return response.data
   },
 }
@@ -80,10 +96,14 @@ export const performanceReviewService = {
   /**
    * POST /api/v1/performance-reviews
    * Employee submits their self-assessment.
-   * Body: { cycleId, selfAssessment, employeeSelfRating }
+   * Backend SelfAssessmentRequest fields: cycleId, selfAssmt, selfRating
    */
   submitSelfAssessment: async (assessmentData) => {
-    const response = await api.post('/performance-reviews', assessmentData)
+    const response = await api.post('/performance-reviews', {
+      cycleId: assessmentData.cycleId,
+      selfAssmt: assessmentData.selfAssessment,
+      selfRating: assessmentData.employeeSelfRating,
+    })
     return response.data
   },
 
@@ -99,21 +119,27 @@ export const performanceReviewService = {
   /**
    * PUT /api/v1/performance-reviews/{reviewId}
    * Manager submits their review and rating for an employee.
-   * Body: { managerFeedback, managerRating, ratingJustification, compensationRecommendations, nextPeriodGoals }
+   * Backend ManagerReviewRequest fields: mgrFb, mgrRating, ratingJust, compRec, nextGoals
    */
   submitManagerReview: async (reviewId, reviewData) => {
-    const response = await api.put(`/performance-reviews/${reviewId}`, reviewData)
+    const response = await api.put(`/performance-reviews/${reviewId}`, {
+      mgrFb: reviewData.managerFeedback,
+      mgrRating: reviewData.managerRating,
+      ratingJust: reviewData.ratingJustification,
+      compRec: reviewData.compensationRecommendations,
+      nextGoals: reviewData.nextPeriodGoals,
+    })
     return response.data
   },
 
   /**
    * POST /api/v1/performance-reviews/{reviewId}/acknowledge
    * Employee acknowledges they have read the manager's review.
-   * Body: { employeeResponse }
+   * Backend reads body.get("response")
    */
   acknowledgeReview: async (reviewId, employeeResponse) => {
     const response = await api.post(`/performance-reviews/${reviewId}/acknowledge`, {
-      employeeResponse,
+      response: employeeResponse,
     })
     return response.data
   },

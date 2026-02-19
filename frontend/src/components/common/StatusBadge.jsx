@@ -18,7 +18,11 @@ const STATUS_COLORS = {
   COMPLETED: 'bg-green-100 text-green-800',
   REJECTED: 'bg-red-100 text-red-800',
 
-  // Review statuses
+  // Review statuses (actual backend PerformanceReviewStatus enum values)
+  SELF_ASSESSMENT_COMPLETED: 'bg-indigo-100 text-indigo-800',
+  MANAGER_REVIEW_COMPLETED: 'bg-teal-100 text-teal-800',
+  COMPLETED_AND_ACKNOWLEDGED: 'bg-green-100 text-green-800',
+  // Legacy / fallback aliases
   SUBMITTED: 'bg-blue-100 text-blue-800',
   ACKNOWLEDGED: 'bg-green-100 text-green-800',
 
@@ -51,6 +55,9 @@ const STATUS_COLORS = {
 const STATUS_LABELS = {
   PENDING_COMPLETION_APPROVAL: 'Pending Approval',
   IN_PROGRESS: 'In Progress',
+  SELF_ASSESSMENT_COMPLETED: 'Self-Assessment Done',
+  MANAGER_REVIEW_COMPLETED: 'Manager Reviewed',
+  COMPLETED_AND_ACKNOWLEDGED: 'Acknowledged',
 }
 
 export default function StatusBadge({ status }) {

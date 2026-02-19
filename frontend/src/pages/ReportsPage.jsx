@@ -66,7 +66,7 @@ export default function ReportsPage() {
       await reportService.generateReport(scope, 'JSON')
       toast.success(`${scope} report generated!`)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Report generation failed')
+      toast.error(err.response?.data?.msg || 'Report generation failed')
     } finally {
       setGenerating(false)
     }
@@ -146,7 +146,7 @@ export default function ReportsPage() {
             {[
               { label: 'Total Goals', value: dashboard?.totalGoals, icon: Target, color: 'text-blue-600 bg-blue-50' },
               { label: 'Completed', value: dashboard?.completedGoals, icon: Award, color: 'text-green-600 bg-green-50' },
-              { label: 'Active Users', value: dashboard?.activeUsers, icon: Users, color: 'text-purple-600 bg-purple-50' },
+              { label: 'Active Users', value: dashboard?.teamSize ?? dashboard?.totalUsers, icon: Users, color: 'text-purple-600 bg-purple-50' },
               { label: 'Completion Rate', value: dashboard?.totalGoals ? `${Math.round((dashboard.completedGoals / dashboard.totalGoals) * 100)}%` : '—', icon: TrendingUp, color: 'text-orange-600 bg-orange-50' },
             ].map(({ label, value, icon: Icon, color }) => (
               <div key={label} className="card">

@@ -42,7 +42,7 @@ export default function LoginPage() {
       navigate('/dashboard')
     } catch (err) {
       setError(
-        err.response?.data?.message ||
+        err.response?.data?.msg ||
         'Login failed. Please check your credentials and try again.'
       )
     } finally {

@@ -68,7 +68,7 @@ export default function AuditLogsPage() {
       await auditService.exportAuditLogs(filters)
       toast.success('Audit logs exported!')
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Export failed')
+      toast.error(err.response?.data?.msg || 'Export failed')
     } finally {
       setExporting(false)
     }

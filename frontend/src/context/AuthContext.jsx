@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
       toast.success(`Welcome back, ${userData.name}!`)
       return userData
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed. Please check your credentials.'
+      const message = error.response?.data?.msg || 'Login failed. Please check your credentials.'
       toast.error(message)
       throw error
     }

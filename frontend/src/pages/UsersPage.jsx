@@ -66,7 +66,7 @@ export default function UsersPage() {
 
   const openEdit = (u) => {
     setEditUser(u)
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, department: u.department || '', managerId: u.managerId || '', status: u.status || 'ACTIVE' })
+    setForm({ name: u.name, email: u.email, password: '', role: u.role, department: u.department || '', managerId: u.manager?.userId || '', status: u.status || 'ACTIVE' })
     setShowModal(true)
   }
 
@@ -90,7 +90,7 @@ export default function UsersPage() {
       setShowModal(false)
       loadUsers()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Operation failed')
+      toast.error(err.response?.data?.msg || 'Operation failed')
     } finally {
       setSubmitting(false)
     }

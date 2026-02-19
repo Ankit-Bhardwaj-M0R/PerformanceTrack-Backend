@@ -99,10 +99,20 @@ export default function GoalsPage() {
 
   const loadManagers = async () => {
     try {
+      // ADMIN/MANAGER can list all users; EMPLOYEE gets 403 from this endpoint
       const data = await userService.getAllUsers(0, 100)
       const list = data?.content || data || []
       setManagers(list.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN'))
-    } catch { /* silently fail */ }
+    } catch (err) {
+      if (err.response?.status === 403 && user?.userId) {
+        // Employees can't call getAllUsers — fall back to fetching their own
+        // profile to get their direct manager's details
+        try {
+          const profile = await userService.getUserById(user.userId)
+          if (profile?.manager) setManagers([profile.manager])
+        } catch { /* silently fail */ }
+      }
+    }
   }
 
   // ─── Filter goals by search term (client-side) ───────────────────────────
@@ -126,7 +136,7 @@ export default function GoalsPage() {
       setGoalForm({ title: '', description: '', category: 'PERFORMANCE', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: '' })
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to create goal')
+      toast.error(err.response?.data?.msg || 'Failed to create goal')
     } finally {
       setSubmitting(false)
     }
@@ -142,7 +152,7 @@ export default function GoalsPage() {
       setShowProgressModal(false)
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to update progress')
+      toast.error(err.response?.data?.msg || 'Failed to update progress')
     } finally {
       setSubmitting(false)
     }
@@ -159,7 +169,7 @@ export default function GoalsPage() {
       setShowCompletionModal(false)
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to submit completion')
+      toast.error(err.response?.data?.msg || 'Failed to submit completion')
     } finally {
       setSubmitting(false)
     }
@@ -197,7 +207,7 @@ export default function GoalsPage() {
       setShowActionModal(false)
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Action failed')
+      toast.error(err.response?.data?.msg || 'Action failed')
     } finally {
       setSubmitting(false)
     }
@@ -213,7 +223,7 @@ export default function GoalsPage() {
       setShowEvidenceModal(false)
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to verify evidence')
+      toast.error(err.response?.data?.msg || 'Failed to verify evidence')
     } finally {
       setSubmitting(false)
     }
@@ -227,7 +237,7 @@ export default function GoalsPage() {
       toast.success('Goal deleted')
       loadGoals()
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to delete goal')
+      toast.error(err.response?.data?.msg || 'Failed to delete goal')
     }
   }
 

@@ -64,7 +64,11 @@ export default function DashboardPage() {
       }
       if (reviewsData.status === 'fulfilled') {
         const reviews = reviewsData.value?.content || reviewsData.value || []
-        setPendingReviews(reviews.filter(r => r.status === 'PENDING' || r.status === 'SUBMITTED'))
+        setPendingReviews(reviews.filter(r =>
+          r.status === 'PENDING' ||
+          r.status === 'SELF_ASSESSMENT_COMPLETED' ||
+          r.status === 'MANAGER_REVIEW_COMPLETED'
+        ))
       }
     } catch (err) {
       setError('Failed to load dashboard data.')
@@ -160,7 +164,7 @@ export default function DashboardPage() {
         {isAdminOrManager() ? (
           <StatCard
             title="Active Users"
-            value={metrics?.activeUsers}
+            value={metrics?.teamSize ?? metrics?.totalUsers}
             icon={Users}
             color="text-purple-600"
             subtitle="Team members"

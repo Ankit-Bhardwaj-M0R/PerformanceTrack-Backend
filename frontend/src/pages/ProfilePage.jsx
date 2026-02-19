@@ -55,7 +55,7 @@ export default function ProfilePage() {
       setPasswordChanged(true)
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to change password. Check your current password.')
+      toast.error(err.response?.data?.msg || 'Failed to change password. Check your current password.')
     } finally {
       setSubmitting(false)
     }
