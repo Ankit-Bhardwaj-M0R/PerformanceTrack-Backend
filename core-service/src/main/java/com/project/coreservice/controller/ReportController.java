@@ -18,13 +18,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/reports")
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+
 public class ReportController {
 
 
     private final ReportService reportSvc;
 
     // Get all reports
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping
     public ApiResponse<List<Report>> getAllReports() {
         List<Report> reports = reportSvc.getAllReports();
@@ -32,6 +33,7 @@ public class ReportController {
     }
 
     // Get report by ID
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/{reportId}")
     public ApiResponse<Report> getReportById(@PathVariable Integer reportId) {
         Report report = reportSvc.getReportById(reportId);
@@ -39,6 +41,7 @@ public class ReportController {
     }
 
     // Generate report
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @PostMapping("/generate")
     public ApiResponse<Report> generateReport(@RequestBody Map<String, String> body,
                                               HttpServletRequest httpReq) {
@@ -61,6 +64,7 @@ public class ReportController {
     }
 
     // Get performance summary
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/performance-summary")
     public ApiResponse<Map<String, Object>> getPerformanceSummary(
             @RequestParam(required = false) Integer cycleId,
@@ -70,6 +74,7 @@ public class ReportController {
     }
 
     // Get goal analyticsv
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/goal-analytics")
     public ApiResponse<Map<String, Object>> getGoalAnalytics() {
         Map<String, Object> analytics = reportSvc.getGoalAnalytics();
@@ -77,6 +82,7 @@ public class ReportController {
     }
 
     // Get department performance
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @GetMapping("/department-performance")
     public ApiResponse<List<Map<String, Object>>> getDeptPerformance() {
         List<Map<String, Object>> performance = reportSvc.getDepartmentPerformance();
