@@ -17,6 +17,10 @@ public interface AuthUserClient {
     @GetMapping("/internal/users/by-manager/{managerId}")
     ApiResponse<List<UserSummaryDTO>> getTeamByManager(@PathVariable("managerId") Integer managerId);
 
+
+    @GetMapping("/internal/users")
+    ApiResponse<List<UserSummaryDTO>> getAllUsers();
+
     @PostMapping("/internal/audit-logs")
     ApiResponse<Void> createAuditLog(@RequestBody AuditLogRequest request);
 }

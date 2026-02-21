@@ -50,4 +50,21 @@ public class InternalUserController {
 
         return ResponseEntity.ok(ApiResponse.success("Team members found", dtos));
     }
+
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<UserSummaryDTO>>> getAllUsers() {
+        List<UserSummaryDTO> dtos = userSvc.getAllUsers().stream()
+                .map(user -> UserSummaryDTO.builder()
+                        .userId(user.getUserId())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .role(user.getRole().name())
+                        .department(user.getDepartment())
+                        .managerId(user.getManager() != null ? user.getManager().getUserId() : null)
+                        .build())
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.success("Users retrieved", dtos));
+    }
 }
