@@ -1,0 +1,467 @@
+ERROR(2026-02-19T09:33:44.276+05:30  INFO 11400 --- [api-gateway] [           main] com.project.gateway.GatewayApplication   : Starting GatewayApplication using Java 21.0.2 with PID 11400 (C:\Users\2466966\OneDrive - Cognizant\Desktop\v1\PerformanceTrack-Backend\api-gateway\target\classes started by 2466966 in C:\Users\2466966\OneDrive - Cognizant\Desktop\v1\PerformanceTrack-Backend)
+
+2026-02-19T09:33:44.281+05:30  INFO 11400 --- [api-gateway] [           main] com.project.gateway.GatewayApplication   : No active profile set, falling back to 1 default profile: "default"
+
+2026-02-19T09:33:46.600+05:30  INFO 11400 --- [api-gateway] [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=036a247b-cbfe-3585-9e5c-40c70eb947fe
+
+2026-02-19T09:33:47.031+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$LoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$LoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+
+2026-02-19T09:33:47.045+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.049+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.088+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration' of type [org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.102+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.104+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerClientsDefaultsMappingsProvider' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration$$Lambda/0x000001da4e348000] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.112+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'defaultsBindHandlerAdvisor' of type [org.springframework.cloud.commons.config.DefaultsBindHandlerAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.185+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'spring.cloud.loadbalancer-org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.247+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.262+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.272+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.netflix.eureka.loadbalancer.LoadBalancerEurekaAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.282+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerClientFactory' of type [org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.301+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'blockingLoadBalancerClient' of type [org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.404+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerServiceInstanceCookieTransformer' of type [org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.412+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'xForwarderHeadersTransformer' of type [org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.432+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.452+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerRequestFactory' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerRequestFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.467+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.542+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [loadBalancerWebClientBuilderBeanPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+
+2026-02-19T09:33:47.549+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactorDeferringLoadBalancerFilterConfig' of type [org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration$ReactorDeferringLoadBalancerFilterConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [loadBalancerWebClientBuilderBeanPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:47.562+05:30  WARN 11400 --- [api-gateway] [           main] trationDelegate$BeanPostProcessorChecker : Bean 'reactorDeferringLoadBalancerExchangeFilterFunction' of type [org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [loadBalancerWebClientBuilderBeanPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+
+2026-02-19T09:33:49.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.gateway.config.GatewayProperties   : Routes supplied from Gateway Properties: [RouteDefinition{id='auth-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/auth/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/auth/(?<segment>.*), _genkey_1=/api/v1/auth/${segment}}}], uri=lb://auth-user-service, order=0, metadata={}}, RouteDefinition{id='user-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/users/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/users/(?<segment>.*), _genkey_1=/api/v1/users/${segment}}}], uri=lb://auth-user-service, order=0, metadata={}}, RouteDefinition{id='audit-log-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/audit-logs/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/audit-logs/(?<segment>.*), _genkey_1=/api/v1/audit-logs/${segment}}}], uri=lb://auth-user-service, order=0, metadata={}}, RouteDefinition{id='notification-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/notifications/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/notifications/(?<segment>.*), _genkey_1=/api/v1/notifications/${segment}}}], uri=lb://notification-service, order=0, metadata={}}, RouteDefinition{id='goal-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/goals/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/goals/(?<segment>.*), _genkey_1=/api/v1/goals/${segment}}}], uri=lb://core-service, order=0, metadata={}}, RouteDefinition{id='performance-review-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/performance-reviews/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/performance-reviews/(?<segment>.*), _genkey_1=/api/v1/performance-reviews/${segment}}}], uri=lb://core-service, order=0, metadata={}}, RouteDefinition{id='review-cycle-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/review-cycles/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/review-cycles/(?<segment>.*), _genkey_1=/api/v1/review-cycles/${segment}}}], uri=lb://core-service, order=0, metadata={}}, RouteDefinition{id='feedback-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/feedback/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/feedback/(?<segment>.*), _genkey_1=/api/v1/feedback/${segment}}}], uri=lb://core-service, order=0, metadata={}}, RouteDefinition{id='report-service', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/api/v1/reports/**}}], filters=[FilterDefinition{name='RewritePath', args={_genkey_0=/api/v1/reports/(?<segment>.*), _genkey_1=/api/v1/reports/${segment}}}], uri=lb://core-service, order=0, metadata={}}, RouteDefinition{id='block-internal-endpoints', predicates=[PredicateDefinition{name='Path', args={_genkey_0=/internal/**}}], filters=[FilterDefinition{name='SetStatus', args={_genkey_0=403}}], uri=no://op, order=0, metadata={}}]
+
+2026-02-19T09:33:50.065+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
+
+2026-02-19T09:33:50.065+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
+
+2026-02-19T09:33:50.066+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
+
+2026-02-19T09:33:50.066+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
+
+2026-02-19T09:33:50.066+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
+
+2026-02-19T09:33:50.066+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
+
+2026-02-19T09:33:50.067+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
+
+2026-02-19T09:33:50.068+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
+
+2026-02-19T09:33:50.068+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
+
+2026-02-19T09:33:50.068+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
+
+2026-02-19T09:33:50.069+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
+
+2026-02-19T09:33:50.069+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+
+2026-02-19T09:33:50.069+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
+
+2026-02-19T09:33:50.069+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
+
+2026-02-19T09:33:51.336+05:30  INFO 11400 --- [api-gateway] [           main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+
+2026-02-19T09:33:51.902+05:30  WARN 11400 --- [api-gateway] [           main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+
+2026-02-19T09:33:52.002+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+
+2026-02-19T09:33:52.405+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+
+2026-02-19T09:33:52.432+05:30  INFO 11400 --- [api-gateway] [           main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+
+2026-02-19T09:33:52.484+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+
+2026-02-19T09:33:53.688+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+
+2026-02-19T09:33:53.688+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 30
+
+2026-02-19T09:33:53.704+05:30  INFO 11400 --- [api-gateway] [           main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+
+2026-02-19T09:33:53.720+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1771473833720 with initial instances count: 4
+
+2026-02-19T09:33:53.720+05:30  INFO 11400 --- [api-gateway] [           main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application API-GATEWAY with eureka with status UP
+
+2026-02-19T09:33:53.720+05:30  INFO 11400 --- [api-gateway] [           main] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1771473833720, current=UP, previous=STARTING]
+
+2026-02-19T09:33:53.736+05:30  INFO 11400 --- [api-gateway] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/api-gateway:8092: registering service...
+
+2026-02-19T09:33:53.795+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying {_genkey_0=/api/v1/auth/**} to Path
+
+2026-02-19T09:33:53.843+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying filter {_genkey_0=/api/v1/auth/(?<segment>.*), _genkey_1=/api/v1/auth/${segment}} to RewritePath
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: auth-service
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying {_genkey_0=/api/v1/users/**} to Path
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying filter {_genkey_0=/api/v1/users/(?<segment>.*), _genkey_1=/api/v1/users/${segment}} to RewritePath
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: user-service
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying {_genkey_0=/api/v1/audit-logs/**} to Path
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying filter {_genkey_0=/api/v1/audit-logs/(?<segment>.*), _genkey_1=/api/v1/audit-logs/${segment}} to RewritePath
+
+2026-02-19T09:33:53.874+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: audit-log-service
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying {_genkey_0=/api/v1/notifications/**} to Path
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying filter {_genkey_0=/api/v1/notifications/(?<segment>.*), _genkey_1=/api/v1/notifications/${segment}} to RewritePath
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: notification-service
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying {_genkey_0=/api/v1/goals/**} to Path
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying filter {_genkey_0=/api/v1/goals/(?<segment>.*), _genkey_1=/api/v1/goals/${segment}} to RewritePath
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: goal-service
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying {_genkey_0=/api/v1/performance-reviews/**} to Path
+
+2026-02-19T09:33:53.890+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying filter {_genkey_0=/api/v1/performance-reviews/(?<segment>.*), _genkey_1=/api/v1/performance-reviews/${segment}} to RewritePath
+
+2026-02-19T09:33:53.906+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: performance-review-service
+
+2026-02-19T09:33:53.906+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying {_genkey_0=/api/v1/review-cycles/**} to Path
+
+2026-02-19T09:33:53.906+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying filter {_genkey_0=/api/v1/review-cycles/(?<segment>.*), _genkey_1=/api/v1/review-cycles/${segment}} to RewritePath
+
+2026-02-19T09:33:53.906+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: review-cycle-service
+
+2026-02-19T09:33:53.906+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying {_genkey_0=/api/v1/feedback/**} to Path
+
+2026-02-19T09:33:53.922+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying filter {_genkey_0=/api/v1/feedback/(?<segment>.*), _genkey_1=/api/v1/feedback/${segment}} to RewritePath
+
+2026-02-19T09:33:53.922+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: feedback-service
+
+2026-02-19T09:33:53.922+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying {_genkey_0=/api/v1/reports/**} to Path
+
+2026-02-19T09:33:53.935+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying filter {_genkey_0=/api/v1/reports/(?<segment>.*), _genkey_1=/api/v1/reports/${segment}} to RewritePath
+
+2026-02-19T09:33:53.938+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: report-service
+
+2026-02-19T09:33:53.938+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying {_genkey_0=/internal/**} to Path
+
+2026-02-19T09:33:53.938+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying filter {_genkey_0=403} to SetStatus
+
+2026-02-19T09:33:53.954+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: block-internal-endpoints
+
+2026-02-19T09:33:53.986+05:30  INFO 11400 --- [api-gateway] [nfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_API-GATEWAY/api-gateway:8092 - registration status: 204
+
+2026-02-19T09:33:54.431+05:30  INFO 11400 --- [api-gateway] [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 8092
+
+2026-02-19T09:33:54.439+05:30  INFO 11400 --- [api-gateway] [           main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8092
+
+2026-02-19T09:33:54.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying {_genkey_0=/api/v1/auth/**} to Path
+
+2026-02-19T09:33:54.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying filter {_genkey_0=/api/v1/auth/(?<segment>.*), _genkey_1=/api/v1/auth/${segment}} to RewritePath
+
+2026-02-19T09:33:54.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: auth-service
+
+2026-02-19T09:33:54.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying {_genkey_0=/api/v1/users/**} to Path
+
+2026-02-19T09:33:54.483+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying filter {_genkey_0=/api/v1/users/(?<segment>.*), _genkey_1=/api/v1/users/${segment}} to RewritePath
+
+2026-02-19T09:33:54.494+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: user-service
+
+2026-02-19T09:33:54.494+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying {_genkey_0=/api/v1/audit-logs/**} to Path
+
+2026-02-19T09:33:54.494+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying filter {_genkey_0=/api/v1/audit-logs/(?<segment>.*), _genkey_1=/api/v1/audit-logs/${segment}} to RewritePath
+
+2026-02-19T09:33:54.500+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: audit-log-service
+
+2026-02-19T09:33:54.501+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying {_genkey_0=/api/v1/notifications/**} to Path
+
+2026-02-19T09:33:54.504+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying filter {_genkey_0=/api/v1/notifications/(?<segment>.*), _genkey_1=/api/v1/notifications/${segment}} to RewritePath
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: notification-service
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying {_genkey_0=/api/v1/goals/**} to Path
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying filter {_genkey_0=/api/v1/goals/(?<segment>.*), _genkey_1=/api/v1/goals/${segment}} to RewritePath
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: goal-service
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying {_genkey_0=/api/v1/performance-reviews/**} to Path
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying filter {_genkey_0=/api/v1/performance-reviews/(?<segment>.*), _genkey_1=/api/v1/performance-reviews/${segment}} to RewritePath
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: performance-review-service
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying {_genkey_0=/api/v1/review-cycles/**} to Path
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying filter {_genkey_0=/api/v1/review-cycles/(?<segment>.*), _genkey_1=/api/v1/review-cycles/${segment}} to RewritePath
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: review-cycle-service
+
+2026-02-19T09:33:54.506+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying {_genkey_0=/api/v1/feedback/**} to Path
+
+2026-02-19T09:33:54.521+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying filter {_genkey_0=/api/v1/feedback/(?<segment>.*), _genkey_1=/api/v1/feedback/${segment}} to RewritePath
+
+2026-02-19T09:33:54.524+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: feedback-service
+
+2026-02-19T09:33:54.524+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying {_genkey_0=/api/v1/reports/**} to Path
+
+2026-02-19T09:33:54.526+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying filter {_genkey_0=/api/v1/reports/(?<segment>.*), _genkey_1=/api/v1/reports/${segment}} to RewritePath
+
+2026-02-19T09:33:54.528+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: report-service
+
+2026-02-19T09:33:54.528+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying {_genkey_0=/internal/**} to Path
+
+2026-02-19T09:33:54.530+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying filter {_genkey_0=403} to SetStatus
+
+2026-02-19T09:33:54.532+05:30 DEBUG 11400 --- [api-gateway] [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: block-internal-endpoints
+
+2026-02-19T09:33:54.537+05:30  INFO 11400 --- [api-gateway] [           main] com.project.gateway.GatewayApplication   : Started GatewayApplication in 11.482 seconds (process running for 12.421)
+
+2026-02-19T09:34:05.595+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: auth-service
+
+2026-02-19T09:34:05.595+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: POST http://localhost:8092/api/v1/auth/login] to Route{id='auth-service', uri=lb://auth-user-service, order=0, predicate=Paths: [/api/v1/auth/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/auth/(?<segment>.*) = '/api/v1/auth/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:05.595+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.h.RoutePredicateHandlerMapping   : [0364ae14-1] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:05.595+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/auth/(?<segment>.*) = '/api/v1/auth/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:05.710+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying {_genkey_0=/api/v1/auth/**} to Path
+
+2026-02-19T09:34:05.721+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying filter {_genkey_0=/api/v1/auth/(?<segment>.*), _genkey_1=/api/v1/auth/${segment}} to RewritePath
+
+2026-02-19T09:34:05.721+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: auth-service
+
+2026-02-19T09:34:05.721+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying {_genkey_0=/api/v1/users/**} to Path
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying filter {_genkey_0=/api/v1/users/(?<segment>.*), _genkey_1=/api/v1/users/${segment}} to RewritePath
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: user-service
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying {_genkey_0=/api/v1/audit-logs/**} to Path
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying filter {_genkey_0=/api/v1/audit-logs/(?<segment>.*), _genkey_1=/api/v1/audit-logs/${segment}} to RewritePath
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: audit-log-service
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying {_genkey_0=/api/v1/notifications/**} to Path
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying filter {_genkey_0=/api/v1/notifications/(?<segment>.*), _genkey_1=/api/v1/notifications/${segment}} to RewritePath
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: notification-service
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying {_genkey_0=/api/v1/goals/**} to Path
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying filter {_genkey_0=/api/v1/goals/(?<segment>.*), _genkey_1=/api/v1/goals/${segment}} to RewritePath
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: goal-service
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying {_genkey_0=/api/v1/performance-reviews/**} to Path
+
+2026-02-19T09:34:05.728+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying filter {_genkey_0=/api/v1/performance-reviews/(?<segment>.*), _genkey_1=/api/v1/performance-reviews/${segment}} to RewritePath
+
+2026-02-19T09:34:05.745+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: performance-review-service
+
+2026-02-19T09:34:05.745+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying {_genkey_0=/api/v1/review-cycles/**} to Path
+
+2026-02-19T09:34:05.748+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying filter {_genkey_0=/api/v1/review-cycles/(?<segment>.*), _genkey_1=/api/v1/review-cycles/${segment}} to RewritePath
+
+2026-02-19T09:34:05.748+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: review-cycle-service
+
+2026-02-19T09:34:05.748+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying {_genkey_0=/api/v1/feedback/**} to Path
+
+2026-02-19T09:34:05.748+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying filter {_genkey_0=/api/v1/feedback/(?<segment>.*), _genkey_1=/api/v1/feedback/${segment}} to RewritePath
+
+2026-02-19T09:34:05.754+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: feedback-service
+
+2026-02-19T09:34:05.754+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying {_genkey_0=/api/v1/reports/**} to Path
+
+2026-02-19T09:34:05.756+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying filter {_genkey_0=/api/v1/reports/(?<segment>.*), _genkey_1=/api/v1/reports/${segment}} to RewritePath
+
+2026-02-19T09:34:05.756+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: report-service
+
+2026-02-19T09:34:05.756+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying {_genkey_0=/internal/**} to Path
+
+2026-02-19T09:34:05.758+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying filter {_genkey_0=403} to SetStatus
+
+2026-02-19T09:34:05.762+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-2] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: block-internal-endpoints
+
+2026-02-19T09:34:06.562+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-3] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: report-service
+
+2026-02-19T09:34:06.563+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-3] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/reports/dashboard] to Route{id='report-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/reports/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/reports/(?<segment>.*) = '/api/v1/reports/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.564+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-3] o.s.c.g.h.RoutePredicateHandlerMapping   : [a79a4a87-2] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.565+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-3] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/reports/(?<segment>.*) = '/api/v1/reports/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.574+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-4] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: goal-service
+
+2026-02-19T09:34:06.575+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-4] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/goals?page=0&size=5] to Route{id='goal-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/goals/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/goals/(?<segment>.*) = '/api/v1/goals/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.575+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-4] o.s.c.g.h.RoutePredicateHandlerMapping   : [8d61308d-3] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.575+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-4] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/goals/(?<segment>.*) = '/api/v1/goals/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.578+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-5] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: performance-review-service
+
+2026-02-19T09:34:06.579+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-5] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/performance-reviews?page=0&size=5] to Route{id='performance-review-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/performance-reviews/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/performance-reviews/(?<segment>.*) = '/api/v1/performance-reviews/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.579+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-5] o.s.c.g.h.RoutePredicateHandlerMapping   : [752b9a54-4] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.579+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-5] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/performance-reviews/(?<segment>.*) = '/api/v1/performance-reviews/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.596+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-6] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: notification-service
+
+2026-02-19T09:34:06.596+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-6] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/notifications?page=0&size=50] to Route{id='notification-service', uri=lb://notification-service, order=0, predicate=Paths: [/api/v1/notifications/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/notifications/(?<segment>.*) = '/api/v1/notifications/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.596+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-6] o.s.c.g.h.RoutePredicateHandlerMapping   : [eb284a01-5] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.596+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-6] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/notifications/(?<segment>.*) = '/api/v1/notifications/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.638+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-7] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: notification-service
+
+2026-02-19T09:34:06.639+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-7] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/notifications/stream?token=undefined] to Route{id='notification-service', uri=lb://notification-service, order=0, predicate=Paths: [/api/v1/notifications/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/notifications/(?<segment>.*) = '/api/v1/notifications/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.639+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-7] o.s.c.g.h.RoutePredicateHandlerMapping   : [19c9f39e-6] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.640+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-7] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/notifications/(?<segment>.*) = '/api/v1/notifications/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.642+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-7] c.p.g.filter.JwtAuthenticationFilter     : Missing or invalid Authorization header for path: /api/v1/notifications/stream
+
+2026-02-19T09:34:06.696+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-4] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.696+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-3] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.696+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-5] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.696+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-4] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/goals
+
+2026-02-19T09:34:06.696+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-3] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/reports/dashboard
+
+2026-02-19T09:34:06.696+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-5] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/performance-reviews
+
+2026-02-19T09:34:06.696+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-6] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.696+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-6] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/notifications
+
+2026-02-19T09:34:06.725+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-8] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: report-service
+
+2026-02-19T09:34:06.727+05:30 DEBUG 11400 --- [api-gateway] [tor-http-nio-10] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: performance-review-service
+
+2026-02-19T09:34:06.725+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-9] o.s.c.g.h.RoutePredicateHandlerMapping   : Route matched: goal-service
+
+2026-02-19T09:34:06.729+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-9] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/goals?page=0&size=5] to Route{id='goal-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/goals/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/goals/(?<segment>.*) = '/api/v1/goals/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.729+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-9] o.s.c.g.h.RoutePredicateHandlerMapping   : [03c191b2-7] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.729+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-8] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/reports/dashboard] to Route{id='report-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/reports/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/reports/(?<segment>.*) = '/api/v1/reports/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.730+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-8] o.s.c.g.h.RoutePredicateHandlerMapping   : [65207869-8] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.731+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-8] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/reports/(?<segment>.*) = '/api/v1/reports/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.729+05:30 DEBUG 11400 --- [api-gateway] [tor-http-nio-10] o.s.c.g.h.RoutePredicateHandlerMapping   : Mapping [Exchange: GET http://localhost:8092/api/v1/performance-reviews?page=0&size=5] to Route{id='performance-review-service', uri=lb://core-service, order=0, predicate=Paths: [/api/v1/performance-reviews/**], match trailing slash: true, gatewayFilters=[[[RewritePath /api/v1/performance-reviews/(?<segment>.*) = '/api/v1/performance-reviews/${segment}'], order = 1]], metadata={}}
+
+2026-02-19T09:34:06.731+05:30 DEBUG 11400 --- [api-gateway] [tor-http-nio-10] o.s.c.g.h.RoutePredicateHandlerMapping   : [28f09121-9] Mapped to org.springframework.cloud.gateway.handler.FilteringWebHandler@4c4631fa
+
+2026-02-19T09:34:06.731+05:30 DEBUG 11400 --- [api-gateway] [tor-http-nio-10] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/performance-reviews/(?<segment>.*) = '/api/v1/performance-reviews/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.730+05:30 DEBUG 11400 --- [api-gateway] [ctor-http-nio-9] o.s.c.g.handler.FilteringWebHandler      : Sorted gatewayFilterFactories: [[GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RemoveCachedBodyFilter@1d15c0a1}, order = -2147483648], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.AdaptCachedBodyGlobalFilter@29d405e6}, order = -2147482648], [GatewayFilterAdapter{delegate=com.project.gateway.filter.JwtAuthenticationFilter@50b46e24}, order = -100], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyWriteResponseFilter@7634f2b}, order = -1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardPathFilter@52bd9a27}, order = 0], [[RewritePath /api/v1/goals/(?<segment>.*) = '/api/v1/goals/${segment}'], order = 1], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.RouteToRequestUrlFilter@15639d09}, order = 10000], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ReactiveLoadBalancerClientFilter@1c30cb85}, order = 10150], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.LoadBalancerServiceInstanceCookieFilter@577bf0aa}, order = 10151], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.WebsocketRoutingFilter@611e5819}, order = 2147483646], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.NettyRoutingFilter@7455dacb}, order = 2147483647], [GatewayFilterAdapter{delegate=org.springframework.cloud.gateway.filter.ForwardRoutingFilter@4fba8eec}, order = 2147483647]]
+
+2026-02-19T09:34:06.738+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-9] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.739+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-9] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/goals
+
+2026-02-19T09:34:06.750+05:30 ERROR 11400 --- [api-gateway] [ctor-http-nio-8] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.750+05:30  WARN 11400 --- [api-gateway] [ctor-http-nio-8] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/reports/dashboard
+
+2026-02-19T09:34:06.751+05:30 ERROR 11400 --- [api-gateway] [tor-http-nio-10] com.project.gateway.util.JwtUtil         : JWT validation failed: JWT strings must contain exactly 2 period characters. Found: 0
+
+2026-02-19T09:34:06.751+05:30  WARN 11400 --- [api-gateway] [tor-http-nio-10] c.p.g.filter.JwtAuthenticationFilter     : Invalid JWT token for path: /api/v1/performance-reviews
+
+2026-02-19T09:34:23.795+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying {_genkey_0=/api/v1/auth/**} to Path
+
+2026-02-19T09:34:23.797+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition auth-service applying filter {_genkey_0=/api/v1/auth/(?<segment>.*), _genkey_1=/api/v1/auth/${segment}} to RewritePath
+
+2026-02-19T09:34:23.798+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: auth-service
+
+2026-02-19T09:34:23.798+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying {_genkey_0=/api/v1/users/**} to Path
+
+2026-02-19T09:34:23.799+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition user-service applying filter {_genkey_0=/api/v1/users/(?<segment>.*), _genkey_1=/api/v1/users/${segment}} to RewritePath
+
+2026-02-19T09:34:23.800+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: user-service
+
+2026-02-19T09:34:23.800+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying {_genkey_0=/api/v1/audit-logs/**} to Path
+
+2026-02-19T09:34:23.801+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition audit-log-service applying filter {_genkey_0=/api/v1/audit-logs/(?<segment>.*), _genkey_1=/api/v1/audit-logs/${segment}} to RewritePath
+
+2026-02-19T09:34:23.801+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: audit-log-service
+
+2026-02-19T09:34:23.801+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying {_genkey_0=/api/v1/notifications/**} to Path
+
+2026-02-19T09:34:23.802+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition notification-service applying filter {_genkey_0=/api/v1/notifications/(?<segment>.*), _genkey_1=/api/v1/notifications/${segment}} to RewritePath
+
+2026-02-19T09:34:23.803+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: notification-service
+
+2026-02-19T09:34:23.804+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying {_genkey_0=/api/v1/goals/**} to Path
+
+2026-02-19T09:34:23.806+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition goal-service applying filter {_genkey_0=/api/v1/goals/(?<segment>.*), _genkey_1=/api/v1/goals/${segment}} to RewritePath
+
+2026-02-19T09:34:23.807+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: goal-service
+
+2026-02-19T09:34:23.807+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying {_genkey_0=/api/v1/performance-reviews/**} to Path
+
+2026-02-19T09:34:23.808+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition performance-review-service applying filter {_genkey_0=/api/v1/performance-reviews/(?<segment>.*), _genkey_1=/api/v1/performance-reviews/${segment}} to RewritePath
+
+2026-02-19T09:34:23.809+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: performance-review-service
+
+2026-02-19T09:34:23.809+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying {_genkey_0=/api/v1/review-cycles/**} to Path
+
+2026-02-19T09:34:23.810+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition review-cycle-service applying filter {_genkey_0=/api/v1/review-cycles/(?<segment>.*), _genkey_1=/api/v1/review-cycles/${segment}} to RewritePath
+
+2026-02-19T09:34:23.814+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: review-cycle-service
+
+2026-02-19T09:34:23.814+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying {_genkey_0=/api/v1/feedback/**} to Path
+
+2026-02-19T09:34:23.815+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition feedback-service applying filter {_genkey_0=/api/v1/feedback/(?<segment>.*), _genkey_1=/api/v1/feedback/${segment}} to RewritePath
+
+2026-02-19T09:34:23.816+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: feedback-service
+
+2026-02-19T09:34:23.816+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying {_genkey_0=/api/v1/reports/**} to Path
+
+2026-02-19T09:34:23.817+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition report-service applying filter {_genkey_0=/api/v1/reports/(?<segment>.*), _genkey_1=/api/v1/reports/${segment}} to RewritePath
+
+2026-02-19T09:34:23.818+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: report-service
+
+2026-02-19T09:34:23.818+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying {_genkey_0=/internal/**} to Path
+
+2026-02-19T09:34:23.819+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition block-internal-endpoints applying filter {_genkey_0=403} to SetStatus
+
+2026-02-19T09:34:23.820+05:30 DEBUG 11400 --- [api-gateway] [freshExecutor-0] o.s.c.g.r.RouteDefinitionRouteLocator    : RouteDefinition matched: block-internal-endpoints
+
+)

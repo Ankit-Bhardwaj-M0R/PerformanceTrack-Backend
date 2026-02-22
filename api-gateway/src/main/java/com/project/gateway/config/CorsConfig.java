@@ -18,7 +18,9 @@ public class CorsConfig {
         // Allow these origins (add your frontend URL)
         corsConfig.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://localhost:3001"
+                "http://localhost:3001",
+                "http://localhost:5173",
+                "http://localhost:5174"
         ));
 
         // Allow all HTTP methods
