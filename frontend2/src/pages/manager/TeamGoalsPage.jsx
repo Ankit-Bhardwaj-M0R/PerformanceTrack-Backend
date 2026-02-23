@@ -9,6 +9,8 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Modal from '../../components/common/Modal'
 import Pagination from '../../components/common/Pagination'
 import goalService from '../../services/goalService'
+import userService from '../../services/userService'
+import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS = [
@@ -21,7 +23,7 @@ const STATUS_OPTIONS = [
 ]
 
 const PRIORITY_OPTIONS = ['', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
-const CATEGORY_OPTIONS = ['', 'PERFORMANCE', 'DEVELOPMENT', 'LEADERSHIP', 'TEAMWORK', 'INNOVATION', 'OTHER']
+const CATEGORY_OPTIONS = ['', 'TECHNICAL', 'BEHAVIORAL', 'PROFESSIONAL_DEVELOPMENT', 'OTHER']
 
 function MetricChip({ label, value, color }) {
   return (
@@ -33,11 +35,13 @@ function MetricChip({ label, value, color }) {
 }
 
 export default function TeamGoalsPage() {
+  const { user } = useAuth()
   const [goals, setGoals]           = useState([])
   const [loading, setLoading]       = useState(true)
   const [page, setPage]             = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
+  const [userMap, setUserMap]       = useState({}) // userId -> user object
 
   const [statusFilter, setStatusFilter]     = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
@@ -52,12 +56,26 @@ export default function TeamGoalsPage() {
   const [evidenceForm, setEvidenceForm] = useState({ verificationStatus: 'VERIFIED', notes: '' })
   const [submitting, setSubmitting]     = useState(false)
 
-  useEffect(() => { loadGoals() }, [page, statusFilter])
+  // Load team members for employee name resolution
+  useEffect(() => {
+    if (user?.userId) {
+      userService.getTeam(user.userId)
+        .then(members => {
+          const list = Array.isArray(members) ? members : (members?.content || [])
+          const map = {}
+          list.forEach(m => { map[m.userId] = m })
+          setUserMap(map)
+        })
+        .catch(() => {/* silently fail — names fall back to User #ID */})
+    }
+  }, [user?.userId])
+
+  useEffect(() => { loadGoals() }, [page])
 
   const loadGoals = async () => {
     setLoading(true)
     try {
-      const data = await goalService.getGoals(page, 10, statusFilter || null)
+      const data = await goalService.getGoals(page, 10)
       const list = data?.content || data || []
       setGoals(list)
       setTotalPages(data?.totalPages || 1)
@@ -69,12 +87,23 @@ export default function TeamGoalsPage() {
     }
   }
 
-  // Client-side filters
+  // Resolve employee name from userMap or fallback to User #ID
+  const getEmployeeName = (goal) => {
+    if (goal.employeeName) return goal.employeeName
+    const u = userMap[goal.assignedToUserId]
+    return u ? u.name : `User #${goal.assignedToUserId}`
+  }
+
+  // Client-side filters — status, priority, category, and search all applied here
   const filtered = goals.filter(g => {
-    const matchSearch  = !searchTerm || g.title?.toLowerCase().includes(searchTerm.toLowerCase()) || g.employeeName?.toLowerCase().includes(searchTerm.toLowerCase())
+    const empName = getEmployeeName(g)
+    const matchSearch  = !searchTerm ||
+      g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      empName.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchStatus  = !statusFilter || g.status === statusFilter
     const matchPri     = !priorityFilter || g.priority === priorityFilter
     const matchCat     = !categoryFilter || g.category === categoryFilter
-    return matchSearch && matchPri && matchCat
+    return matchSearch && matchStatus && matchPri && matchCat
   })
 
   // Metrics
@@ -137,6 +166,8 @@ export default function TeamGoalsPage() {
     REQUEST_EVIDENCE: 'Request Additional Evidence',
   }
 
+  const hasActiveFilters = statusFilter || priorityFilter || categoryFilter || searchTerm
+
   return (
     <Layout title="Team Goals">
       {/* Metrics Row */}
@@ -148,7 +179,7 @@ export default function TeamGoalsPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
+      <div className="flex flex-col sm:flex-row gap-3 mb-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -159,21 +190,37 @@ export default function TeamGoalsPage() {
             className="input-field pl-9"
           />
         </div>
-        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(0) }} className="input-field w-auto">
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input-field w-auto">
           {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
         <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)} className="input-field w-auto">
           <option value="">All Priorities</option>
-          {PRIORITY_OPTIONS.filter(Boolean).map(p => <option key={p}>{p}</option>)}
+          {PRIORITY_OPTIONS.filter(Boolean).map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className="input-field w-auto">
           <option value="">All Categories</option>
-          {CATEGORY_OPTIONS.filter(Boolean).map(c => <option key={c}>{c}</option>)}
+          {CATEGORY_OPTIONS.filter(Boolean).map(c => <option key={c} value={c}>{c}</option>)}
         </select>
+        {hasActiveFilters && (
+          <button onClick={() => { setStatusFilter(''); setPriorityFilter(''); setCategoryFilter(''); setSearchTerm('') }}
+            className="btn-secondary text-xs px-3">
+            Clear
+          </button>
+        )}
         <button onClick={loadGoals} className="btn-secondary p-2">
           <RefreshCw size={16} />
         </button>
       </div>
+
+      {/* Active filter chips */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 mb-4 text-xs">
+          {statusFilter && <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Status: {STATUS_OPTIONS.find(o => o.value === statusFilter)?.label}</span>}
+          {priorityFilter && <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Priority: {priorityFilter}</span>}
+          {categoryFilter && <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Category: {categoryFilter}</span>}
+          <span className="text-gray-500 self-center">{filtered.length} result{filtered.length !== 1 ? 's' : ''} on this page</span>
+        </div>
+      )}
 
       {/* Goals Table */}
       {loading ? (
@@ -200,6 +247,7 @@ export default function TeamGoalsPage() {
                   <GoalRow
                     key={goal.goalId}
                     goal={goal}
+                    employeeName={getEmployeeName(goal)}
                     onApprove={() => openAction(goal, 'APPROVE')}
                     onRequestChanges={() => openAction(goal, 'REQUEST_CHANGES')}
                     onApproveCompletion={() => openAction(goal, 'APPROVE_COMPLETION')}
@@ -288,13 +336,16 @@ export default function TeamGoalsPage() {
   )
 }
 
-function GoalRow({ goal, onApprove, onRequestChanges, onApproveCompletion, onRejectCompletion, onRequestEvidence, onVerifyEvidence }) {
+function GoalRow({ goal, employeeName, onApprove, onRequestChanges, onApproveCompletion, onRejectCompletion, onRequestEvidence, onVerifyEvidence }) {
   const priorityColors = { CRITICAL: 'text-red-600 font-bold', HIGH: 'text-orange-500', MEDIUM: 'text-yellow-600', LOW: 'text-green-600' }
 
   return (
     <tr className="hover:bg-gray-50 transition-colors">
       <td className="px-4 py-3 text-xs text-gray-400 font-mono">#{goal.goalId}</td>
-      <td className="px-4 py-3 text-gray-800 font-medium whitespace-nowrap">{goal.employeeName || '—'}</td>
+      <td className="px-4 py-3 whitespace-nowrap">
+        <p className="text-gray-800 font-medium">{employeeName}</p>
+        <p className="text-xs text-gray-400">ID: {goal.assignedToUserId}</p>
+      </td>
       <td className="px-4 py-3 text-gray-700 max-w-xs">
         <p className="truncate font-medium" title={goal.title}>{goal.title}</p>
         {goal.description && <p className="text-xs text-gray-400 truncate mt-0.5" title={goal.description}>{goal.description}</p>}

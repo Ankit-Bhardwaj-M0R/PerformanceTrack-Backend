@@ -79,8 +79,10 @@ export const performanceReviewService = {
    * Manager: reviews for their team
    * Admin: all reviews
    */
-  getReviews: async (page = 0, size = 10) => {
-    const response = await api.get('/performance-reviews', { params: { page, size } })
+  getReviews: async (page = 0, size = 10, cycleId = null) => {
+    const params = { page, size }
+    if (cycleId) params.cycleId = cycleId
+    const response = await api.get('/performance-reviews', { params })
     return response.data
   },
 

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { ClipboardList, Star, CheckCircle, Eye, Send, Search, RefreshCw } from 'lucide-react'
+import { ClipboardList, Eye, Search, RefreshCw, ChevronDown } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import Modal from '../../components/common/Modal'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
 import { performanceReviewService, reviewCycleService } from '../../services/reviewService'
+import userService from '../../services/userService'
+import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
 function MetricChip({ label, value, color }) {
@@ -17,14 +19,12 @@ function MetricChip({ label, value, color }) {
   )
 }
 
-function StarRating({ value, onChange, readOnly = false }) {
+function StarRating({ value, onChange }) {
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map(star => (
-        <button key={star} type="button"
-          onClick={() => !readOnly && onChange && onChange(star)}
-          className={`text-2xl transition-colors ${star <= value ? 'text-yellow-400' : 'text-gray-200'}
-            ${!readOnly ? 'hover:text-yellow-300 cursor-pointer' : 'cursor-default'}`}>
+        <button key={star} type="button" onClick={() => onChange && onChange(star)}
+          className={`text-2xl transition-colors cursor-pointer ${star <= value ? 'text-yellow-400' : 'text-gray-200'} hover:text-yellow-300`}>
           ★
         </button>
       ))}
@@ -38,47 +38,86 @@ const STATUS_FILTERS = [
   { value: 'PENDING', label: 'Pending' },
   { value: 'SELF_ASSESSMENT_COMPLETED', label: 'Self-Assessment Done' },
   { value: 'MANAGER_REVIEW_COMPLETED', label: 'Manager Reviewed' },
-  { value: 'ACKNOWLEDGED', label: 'Acknowledged' },
-  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'COMPLETED_AND_ACKNOWLEDGED', label: 'Acknowledged' },
 ]
 
 export default function ManagerReviewsPage() {
-  const [reviews, setReviews]       = useState([])
-  const [activeCycle, setActiveCycle] = useState(null)
-  const [loading, setLoading]       = useState(true)
-  const [page, setPage]             = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
+  const { user } = useAuth()
+
+  const [reviews, setReviews]         = useState([])
+  const [cycles, setCycles]           = useState([])       // all available cycles
+  const [selectedCycleId, setSelectedCycleId] = useState(null)
+  const [userMap, setUserMap]         = useState({})       // userId → user
+  const [teamMemberIds, setTeamMemberIds] = useState(new Set()) // for filtering
+
+  const [loading, setLoading]         = useState(true)
+  const [loadingCycles, setLoadingCycles] = useState(true)
+  const [page, setPage]               = useState(0)
+  const [totalPages, setTotalPages]   = useState(0)
   const [totalElements, setTotalElements] = useState(0)
 
   const [statusFilter, setStatusFilter] = useState('')
   const [searchTerm, setSearchTerm]     = useState('')
 
-  const [selectedReview, setSelectedReview] = useState(null)
-  const [showManagerReviewModal, setShowManagerReviewModal] = useState(false)
-  const [showViewModal, setShowViewModal]                   = useState(false)
-  const [submitting, setSubmitting]                         = useState(false)
-
+  const [selectedReview, setSelectedReview]               = useState(null)
+  const [showReviewModal, setShowReviewModal]             = useState(false)
+  const [showViewModal, setShowViewModal]                 = useState(false)
+  const [submitting, setSubmitting]                       = useState(false)
   const [managerForm, setManagerForm] = useState({
     managerFeedback: '', managerRating: 3,
     ratingJustification: '', compensationRecommendations: '', nextPeriodGoals: '',
   })
 
-  useEffect(() => { loadData() }, [page])
+  // ── Load cycles + team on mount ─────────────────────────────────────────
+  useEffect(() => {
+    loadCycles()
+    if (user?.userId) loadTeam()
+  }, [user?.userId])
 
-  const loadData = async () => {
+  // ── Load reviews when selected cycle or page changes ────────────────────
+  useEffect(() => {
+    if (selectedCycleId != null) loadReviews()
+  }, [selectedCycleId, page])
+
+  const loadCycles = async () => {
+    setLoadingCycles(true)
+    try {
+      const data = await reviewCycleService.getAllCycles()
+      const list = Array.isArray(data) ? data : (data?.content || [])
+      setCycles(list)
+      // Auto-select: active cycle first, otherwise most recent
+      const active = list.find(c => c.status === 'ACTIVE')
+      const first  = list[0]
+      const pick   = active || first
+      if (pick) setSelectedCycleId(pick.cycleId)
+    } catch {
+      // no cycles available — leave selectedCycleId null
+    } finally {
+      setLoadingCycles(false)
+    }
+  }
+
+  const loadTeam = async () => {
+    try {
+      const members = await userService.getTeam(user.userId)
+      const list = Array.isArray(members) ? members : (members?.content || [])
+      const map = {}
+      const ids = new Set()
+      list.forEach(m => { map[m.userId] = m; ids.add(m.userId) })
+      setUserMap(map)
+      setTeamMemberIds(ids)
+    } catch { /* silently fail — show all reviews if team can't load */ }
+  }
+
+  const loadReviews = async () => {
     setLoading(true)
     try {
-      const [reviewsRes, cycleRes] = await Promise.allSettled([
-        performanceReviewService.getReviews(page, 20),
-        reviewCycleService.getActiveCycle(),
-      ])
-      if (reviewsRes.status === 'fulfilled') {
-        const list = reviewsRes.value?.content || reviewsRes.value || []
-        setReviews(list)
-        setTotalPages(reviewsRes.value?.totalPages || 1)
-        setTotalElements(reviewsRes.value?.totalElements || list.length)
-      }
-      if (cycleRes.status === 'fulfilled') setActiveCycle(cycleRes.value?.data || cycleRes.value)
+      // cycleId is required for manager to see team reviews
+      const data = await performanceReviewService.getReviews(0, 200, selectedCycleId)
+      const list = Array.isArray(data) ? data : (data?.content || [])
+      setReviews(list)
+      setTotalPages(data?.totalPages || 1)
+      setTotalElements(data?.totalElements || list.length)
     } catch {
       toast.error('Failed to load reviews')
     } finally {
@@ -86,18 +125,37 @@ export default function ManagerReviewsPage() {
     }
   }
 
+  const getEmployeeName = (review) => {
+    const u = userMap[review.userId]
+    return u?.name || `User #${review.userId}`
+  }
+
+  const getCycleName = (review) =>
+    review.cycle?.title || (selectedCycleId ? `Cycle #${selectedCycleId}` : '—')
+
+  // Client-side filter: only team members (if team loaded), then status + search
   const filtered = reviews.filter(r => {
+    if (teamMemberIds.size > 0 && !teamMemberIds.has(r.userId)) return false
     const matchStatus = !statusFilter || r.status === statusFilter
-    const matchSearch = !searchTerm || String(r.userId).includes(searchTerm) || r.employeeName?.toLowerCase().includes(searchTerm.toLowerCase())
+    const empName = getEmployeeName(r)
+    const matchSearch = !searchTerm ||
+      String(r.userId).includes(searchTerm) ||
+      empName.toLowerCase().includes(searchTerm.toLowerCase())
     return matchStatus && matchSearch
   })
 
-  // Metrics
-  const total     = totalElements
-  const pending   = reviews.filter(r => r.status === 'PENDING' || r.status === 'SELF_ASSESSMENT_COMPLETED').length
-  const completed = reviews.filter(r => r.status === 'COMPLETED' || r.status === 'ACKNOWLEDGED').length
-  const ratings   = reviews.filter(r => r.managerRating).map(r => r.managerRating)
-  const avgRating = ratings.length > 0 ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1) : '—'
+  // Metrics (over current page's filtered reviews)
+  const total     = filtered.length
+  const pending   = filtered.filter(r => r.status === 'PENDING').length
+  const awaitingReview = filtered.filter(r => r.status === 'SELF_ASSESSMENT_COMPLETED').length
+  const done      = filtered.filter(r =>
+    r.status === 'MANAGER_REVIEW_COMPLETED' || r.status === 'COMPLETED_AND_ACKNOWLEDGED'
+  ).length
+  const avgRating = (() => {
+    const rated = filtered.filter(r => r.managerRating)
+    if (!rated.length) return '—'
+    return (rated.reduce((s, r) => s + r.managerRating, 0) / rated.length).toFixed(1)
+  })()
 
   const handleManagerReview = async (e) => {
     e.preventDefault()
@@ -108,8 +166,8 @@ export default function ManagerReviewsPage() {
     try {
       await performanceReviewService.submitManagerReview(selectedReview.reviewId, managerForm)
       toast.success('Manager review submitted!')
-      setShowManagerReviewModal(false)
-      loadData()
+      setShowReviewModal(false)
+      loadReviews()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Submission failed')
     } finally {
@@ -117,45 +175,93 @@ export default function ManagerReviewsPage() {
     }
   }
 
+  const selectedCycle = cycles.find(c => c.cycleId === selectedCycleId)
+
   return (
-    <Layout title="Reviews">
+    <Layout title="Team Performance Reviews">
       {/* Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <MetricChip label="Total Reviews"     value={total}     color="bg-blue-50 text-blue-700" />
-        <MetricChip label="Pending Actions"   value={pending}   color="bg-yellow-50 text-yellow-700" />
-        <MetricChip label="Completed"         value={completed} color="bg-green-50 text-green-700" />
-        <MetricChip label="Avg Rating Given"  value={avgRating} color="bg-purple-50 text-purple-700" />
+        <MetricChip label="Total Reviews"      value={total}         color="bg-blue-50 text-blue-700" />
+        <MetricChip label="Pending Self-Assmt" value={pending}       color="bg-gray-50 text-gray-600" />
+        <MetricChip label="Awaiting My Review" value={awaitingReview} color="bg-yellow-50 text-yellow-700" />
+        <MetricChip label="Completed"          value={done}          color="bg-green-50 text-green-700" />
       </div>
 
-      {/* Active Cycle Banner */}
-      {activeCycle && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-          <p className="text-sm font-semibold text-blue-800">Active Review Cycle: <span className="font-bold">{activeCycle.title}</span></p>
-          <p className="text-xs text-blue-600 mt-0.5">{activeCycle.startDate} → {activeCycle.endDate}</p>
-        </div>
-      )}
+      {/* Filters row */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
+        {/* Cycle selector */}
+        <select
+          value={selectedCycleId ?? ''}
+          onChange={e => { setSelectedCycleId(e.target.value ? Number(e.target.value) : null); setPage(0) }}
+          className="input-field w-auto"
+          disabled={loadingCycles}
+        >
+          {loadingCycles
+            ? <option>Loading cycles...</option>
+            : cycles.length === 0
+              ? <option value="">No review cycles</option>
+              : cycles.map(c => (
+                  <option key={c.cycleId} value={c.cycleId}>
+                    {c.title} {c.status === 'ACTIVE' ? '(Active)' : `(${c.status})`}
+                  </option>
+                ))
+          }
+        </select>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
+        {/* Status filter */}
+        <select
+          value={statusFilter}
+          onChange={e => { setStatusFilter(e.target.value); setPage(0) }}
+          className="input-field w-auto"
+        >
+          {STATUS_FILTERS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Search by employee name or ID..."
             value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
             className="input-field pl-9" />
         </div>
-        <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(0) }} className="input-field w-auto">
-          {STATUS_FILTERS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <button onClick={loadData} className="btn-secondary p-2"><RefreshCw size={16} /></button>
+
+        <button onClick={loadReviews} className="btn-secondary p-2" title="Refresh">
+          <RefreshCw size={16} />
+        </button>
       </div>
 
-      {/* Reviews Table */}
+      {/* Active cycle info */}
+      {selectedCycle && (
+        <div className={`rounded-xl px-4 py-3 mb-6 text-sm flex items-center gap-3
+          ${selectedCycle.status === 'ACTIVE'
+            ? 'bg-blue-50 border border-blue-200 text-blue-800'
+            : 'bg-gray-50 border border-gray-200 text-gray-700'}`}>
+          <span className="font-semibold">{selectedCycle.title}</span>
+          <span className="text-xs opacity-70">{selectedCycle.startDate} → {selectedCycle.endDate}</span>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            selectedCycle.status === 'ACTIVE'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-gray-200 text-gray-600'
+          }`}>{selectedCycle.status}</span>
+        </div>
+      )}
+
+      {!selectedCycle && !loadingCycles && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-yellow-800 text-sm">
+          No review cycles found. Ask your administrator to create a review cycle.
+        </div>
+      )}
+
+      {/* Table */}
       {loading ? (
         <LoadingSpinner message="Loading reviews..." />
       ) : filtered.length === 0 ? (
         <div className="card text-center py-16">
           <ClipboardList size={48} className="mx-auto mb-3 text-gray-300" />
           <p className="text-gray-500 font-medium">No reviews found</p>
+          <p className="text-gray-400 text-sm mt-1">
+            {!selectedCycle ? 'Select a review cycle above.' : 'No reviews match your filters.'}
+          </p>
         </div>
       ) : (
         <div className="card p-0 overflow-hidden">
@@ -163,7 +269,7 @@ export default function ManagerReviewsPage() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['Review ID', 'Employee', 'Status', 'Self Rating', 'Manager Rating', 'Submitted', 'Actions'].map(h => (
+                  {['Employee', 'Cycle', 'Status', 'Self Rating', 'Manager Rating', 'Submitted', 'Actions'].map(h => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -171,24 +277,37 @@ export default function ManagerReviewsPage() {
               <tbody className="divide-y divide-gray-100">
                 {filtered.map(review => (
                   <tr key={review.reviewId} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-xs text-gray-400 font-mono">#{review.reviewId}</td>
-                    <td className="px-4 py-3 text-gray-800 font-medium">{review.employeeName || `User #${review.userId}`}</td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-gray-800">{getEmployeeName(review)}</p>
+                      <p className="text-xs text-gray-400">ID: {review.userId}</p>
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
+                      {getCycleName(review)}
+                    </td>
                     <td className="px-4 py-3"><StatusBadge status={review.status} /></td>
-                    <td className="px-4 py-3 text-gray-600">{review.employeeSelfRating ? `${review.employeeSelfRating}/5` : '—'}</td>
-                    <td className="px-4 py-3 text-gray-600">{review.managerRating ? `${review.managerRating}/5` : '—'}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{review.submittedDate?.split('T')[0] || '—'}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {review.employeeSelfRating ? `${review.employeeSelfRating}/5` : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {review.managerRating ? `${review.managerRating}/5` : '—'}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
+                      {review.submittedDate?.split('T')[0] || '—'}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-1 flex-wrap">
-                        <button onClick={() => { setSelectedReview(review); setShowViewModal(true) }}
+                        <button
+                          onClick={() => { setSelectedReview(review); setShowViewModal(true) }}
                           className="btn-secondary text-xs py-1 px-2 flex items-center gap-1">
                           <Eye size={12} /> View
                         </button>
                         {review.status === 'SELF_ASSESSMENT_COMPLETED' && (
-                          <button onClick={() => {
-                            setSelectedReview(review)
-                            setManagerForm({ managerFeedback: '', managerRating: 3, ratingJustification: '', compensationRecommendations: '', nextPeriodGoals: '' })
-                            setShowManagerReviewModal(true)
-                          }}
+                          <button
+                            onClick={() => {
+                              setSelectedReview(review)
+                              setManagerForm({ managerFeedback: '', managerRating: 3, ratingJustification: '', compensationRecommendations: '', nextPeriodGoals: '' })
+                              setShowReviewModal(true)
+                            }}
                             className="btn-primary text-xs py-1 px-2 flex items-center gap-1">
                             <ClipboardList size={12} /> Review
                           </button>
@@ -206,14 +325,19 @@ export default function ManagerReviewsPage() {
         </div>
       )}
 
-      {/* Manager Review Modal */}
-      <Modal isOpen={showManagerReviewModal} onClose={() => setShowManagerReviewModal(false)} title="Submit Manager Review" size="lg">
+      {/* Submit Manager Review Modal */}
+      <Modal isOpen={showReviewModal} onClose={() => setShowReviewModal(false)} title="Submit Manager Review" size="lg">
         <form onSubmit={handleManagerReview} className="space-y-4">
+          <div className="bg-gray-50 rounded-lg p-3 text-sm">
+            <p className="font-medium text-gray-700">Employee: <span className="text-blue-700 font-semibold">{getEmployeeName(selectedReview)}</span></p>
+          </div>
           {selectedReview?.selfAssessment && (
             <div className="bg-blue-50 rounded-lg p-3 text-sm">
-              <p className="font-medium text-blue-700 mb-1">Employee Self-Assessment:</p>
+              <p className="font-medium text-blue-700 mb-1">Self-Assessment:</p>
               <p className="text-gray-600">{selectedReview.selfAssessment}</p>
-              <p className="text-xs text-blue-500 mt-1">Self Rating: {selectedReview.employeeSelfRating}/5</p>
+              {selectedReview.employeeSelfRating && (
+                <p className="text-xs text-blue-500 mt-1">Self Rating: {selectedReview.employeeSelfRating}/5</p>
+              )}
             </div>
           )}
           <div>
@@ -251,7 +375,7 @@ export default function ManagerReviewsPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="button" onClick={() => setShowManagerReviewModal(false)} className="btn-secondary flex-1">Cancel</button>
+            <button type="button" onClick={() => setShowReviewModal(false)} className="btn-secondary flex-1">Cancel</button>
             <button type="submit" disabled={submitting} className="btn-primary flex-1">
               {submitting ? 'Submitting...' : 'Submit Review'}
             </button>
@@ -259,28 +383,37 @@ export default function ManagerReviewsPage() {
         </form>
       </Modal>
 
-      {/* View Modal */}
+      {/* View Review Details Modal */}
       <Modal isOpen={showViewModal} onClose={() => setShowViewModal(false)} title="Review Details" size="lg">
         {selectedReview && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <StatusBadge status={selectedReview.status} />
-              <span className="text-sm text-gray-500">Submitted: {selectedReview.submittedDate?.split('T')[0] || '—'}</span>
+              <span className="font-medium text-gray-700">{getEmployeeName(selectedReview)}</span>
+              <span className="text-sm text-gray-500">{getCycleName(selectedReview)}</span>
             </div>
             {selectedReview.selfAssessment && (
               <div className="bg-blue-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-blue-700 uppercase mb-2">Self-Assessment</p>
                 <p className="text-sm text-gray-700">{selectedReview.selfAssessment}</p>
-                <p className="text-xs text-blue-500 mt-2">Self Rating: {selectedReview.employeeSelfRating}/5</p>
+                {selectedReview.employeeSelfRating && (
+                  <p className="text-xs text-blue-500 mt-2">Self Rating: {selectedReview.employeeSelfRating}/5</p>
+                )}
               </div>
             )}
             {selectedReview.managerFeedback && (
               <div className="bg-green-50 rounded-lg p-4">
                 <p className="text-xs font-semibold text-green-700 uppercase mb-2">Manager Review</p>
                 <p className="text-sm text-gray-700">{selectedReview.managerFeedback}</p>
-                <p className="text-xs text-green-600 mt-2">Manager Rating: {selectedReview.managerRating}/5</p>
-                {selectedReview.ratingJustification && <p className="text-xs text-gray-500 mt-1">Justification: {selectedReview.ratingJustification}</p>}
-                {selectedReview.compensationRecommendations && <p className="text-xs text-gray-500 mt-1">Compensation: {selectedReview.compensationRecommendations}</p>}
+                {selectedReview.managerRating && (
+                  <p className="text-xs text-green-600 mt-2">Manager Rating: {selectedReview.managerRating}/5</p>
+                )}
+                {selectedReview.ratingJustification && (
+                  <p className="text-xs text-gray-500 mt-1">Justification: {selectedReview.ratingJustification}</p>
+                )}
+                {selectedReview.compensationRecommendations && (
+                  <p className="text-xs text-gray-500 mt-1">Compensation: {selectedReview.compensationRecommendations}</p>
+                )}
               </div>
             )}
             {selectedReview.employeeResponse && (

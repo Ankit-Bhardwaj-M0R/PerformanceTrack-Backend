@@ -36,7 +36,7 @@ import toast from 'react-hot-toast'
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Goal categories and priorities from the backend enums
-const GOAL_CATEGORIES = ['PERFORMANCE', 'DEVELOPMENT', 'LEADERSHIP', 'TEAMWORK', 'INNOVATION', 'OTHER']
+const GOAL_CATEGORIES = ['TECHNICAL', 'BEHAVIORAL', 'PROFESSIONAL_DEVELOPMENT', 'OTHER']
 const GOAL_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 export default function GoalsPage() {
@@ -50,6 +50,8 @@ export default function GoalsPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
   const [statusFilter, setStatusFilter] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
   // Modal visibility toggles
@@ -63,7 +65,7 @@ export default function GoalsPage() {
 
   // Form states
   const [goalForm, setGoalForm] = useState({
-    title: '', description: '', category: 'PERFORMANCE', priority: 'MEDIUM',
+    title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM',
     startDate: '', endDate: '', assignedManagerId: ''
   })
   const [progressForm, setProgressForm] = useState({ notes: '', progressPercentage: 50 })
@@ -75,17 +77,25 @@ export default function GoalsPage() {
   const [submitting, setSubmitting] = useState(false)
 
   // ─── Load Data ────────────────────────────────────────────────────────────
-  useEffect(() => { loadGoals() }, [page, statusFilter])
+  useEffect(() => { loadGoals() }, [page])
 
   useEffect(() => {
     // Load managers list for the "create goal" form (employees need to pick a manager)
     if (isEmployee()) loadManagers()
   }, [])
 
+  // Auto-populate assignedManagerId as soon as the managers list is resolved.
+  // user.managerId is NOT present in LoginResponse, so managers[] is the only source.
+  useEffect(() => {
+    if (managers.length > 0 && !goalForm.assignedManagerId) {
+      setGoalForm(prev => ({ ...prev, assignedManagerId: managers[0].userId || '' }))
+    }
+  }, [managers])
+
   const loadGoals = async () => {
     setLoading(true)
     try {
-      const data = await goalService.getGoals(page, 10, statusFilter || null)
+      const data = await goalService.getGoals(page, 10)
       const list = data?.content || data || []
       setGoals(list)
       setTotalPages(data?.totalPages || 1)
@@ -99,33 +109,42 @@ export default function GoalsPage() {
 
   const loadManagers = async () => {
     try {
-      // ADMIN/MANAGER can list all users; EMPLOYEE gets 403 from this endpoint
-      const data = await userService.getAllUsers(0, 100)
-      const list = data?.content || data || []
-      setManagers(list.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN'))
-    } catch (err) {
-      if (err.response?.status === 403 && user?.userId) {
-        // Employees can't call getAllUsers — fall back to fetching their own
-        // profile to get their direct manager's details
-        try {
-          const profile = await userService.getUserById(user.userId)
-          if (profile?.manager) setManagers([profile.manager])
-        } catch { /* silently fail */ }
+      if (isEmployee()) {
+        // Employees can't call getAllUsers — directly fetch own profile to get assigned manager
+        const profile = await userService.getUserById(user.userId)
+        const mgr = profile?.manager
+        if (mgr?.userId) {
+          setManagers([mgr])
+          setGoalForm(prev => ({ ...prev, assignedManagerId: mgr.userId }))
+        }
+      } else {
+        const data = await userService.getAllUsers(0, 100)
+        const list = Array.isArray(data) ? data : (data?.content || [])
+        setManagers(list.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN'))
       }
-    }
+    } catch { /* silently fail */ }
   }
 
-  // ─── Filter goals by search term (client-side) ───────────────────────────
-  const filteredGoals = goals.filter(g =>
-    g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    g.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // ─── Client-side filter: status, priority, category, and search ─────────
+  const filteredGoals = goals.filter(g => {
+    const matchSearch   = !searchTerm ||
+      g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.category?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchStatus   = !statusFilter || g.status === statusFilter
+    const matchPriority = !priorityFilter || g.priority === priorityFilter
+    const matchCategory = !categoryFilter || g.category === categoryFilter
+    return matchSearch && matchStatus && matchPriority && matchCategory
+  })
 
   // ─── EMPLOYEE: Create Goal ────────────────────────────────────────────────
   const handleCreateGoal = async (e) => {
     e.preventDefault()
-    if (!goalForm.title || !goalForm.assignedManagerId) {
-      toast.error('Title and Manager are required')
+    if (!goalForm.title) {
+      toast.error('Title is required')
+      return
+    }
+    if (!goalForm.assignedManagerId) {
+      toast.error('No manager is assigned to your account. Please contact your administrator.')
       return
     }
     setSubmitting(true)
@@ -133,7 +152,7 @@ export default function GoalsPage() {
       await goalService.createGoal(goalForm)
       toast.success('Goal created successfully!')
       setShowCreateModal(false)
-      setGoalForm({ title: '', description: '', category: 'PERFORMANCE', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: '' })
+      setGoalForm({ title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: managers[0]?.userId || '' })
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to create goal')
@@ -262,9 +281,9 @@ export default function GoalsPage() {
   return (
     <Layout title="Goals Management">
       {/* ── Top Toolbar ── */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-3 flex-wrap">
         {/* Search */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -278,7 +297,7 @@ export default function GoalsPage() {
         {/* Status filter */}
         <select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(0) }}
+          onChange={(e) => setStatusFilter(e.target.value)}
           className="input-field w-auto"
         >
           <option value="">All Statuses</option>
@@ -289,16 +308,62 @@ export default function GoalsPage() {
           <option value="REJECTED">Rejected</option>
         </select>
 
+        {/* Priority filter */}
+        <select
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+          className="input-field w-auto"
+        >
+          <option value="">All Priorities</option>
+          {GOAL_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+
+        {/* Category filter */}
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="input-field w-auto"
+        >
+          <option value="">All Categories</option>
+          {GOAL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+        </select>
+
+        {/* Clear filters */}
+        {(statusFilter || priorityFilter || categoryFilter || searchTerm) && (
+          <button
+            onClick={() => { setStatusFilter(''); setPriorityFilter(''); setCategoryFilter(''); setSearchTerm('') }}
+            className="btn-secondary text-xs px-3"
+          >
+            Clear
+          </button>
+        )}
+
         {/* Create button (Employees only) */}
         {isEmployee() && (
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setGoalForm({
+                title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM',
+                startDate: '', endDate: '', assignedManagerId: managers[0]?.userId || ''
+              })
+              setShowCreateModal(true)
+            }}
             className="btn-primary flex items-center gap-2 whitespace-nowrap"
           >
             <Plus size={18} /> New Goal
           </button>
         )}
       </div>
+
+      {/* Active filter chips */}
+      {(statusFilter || priorityFilter || categoryFilter) && (
+        <div className="flex flex-wrap gap-2 mb-4 text-xs">
+          {statusFilter && <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Status: {statusFilter}</span>}
+          {priorityFilter && <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Priority: {priorityFilter}</span>}
+          {categoryFilter && <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Category: {categoryFilter}</span>}
+          <span className="text-gray-500 self-center">{filteredGoals.length} goal{filteredGoals.length !== 1 ? 's' : ''} shown</span>
+        </div>
+      )}
 
       {/* ── Goals List ── */}
       {loading ? (
@@ -394,16 +459,14 @@ export default function GoalsPage() {
                 onChange={e => setGoalForm({ ...goalForm, endDate: e.target.value })} />
             </div>
           </div>
-          <div>
-            <label className="form-label">Assign to Manager *</label>
-            <select className="input-field" value={goalForm.assignedManagerId}
-              onChange={e => setGoalForm({ ...goalForm, assignedManagerId: e.target.value })}>
-              <option value="">Select your manager...</option>
-              {managers.map(m => (
-                <option key={m.userId} value={m.userId}>{m.name} ({m.department})</option>
-              ))}
-            </select>
-          </div>
+          {/* Manager is auto-assigned from the employee's profile */}
+          {managers.length > 0 && (
+            <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+              <span className="font-medium">Assigned Manager: </span>
+              {managers.find(m => String(m.userId) === String(goalForm.assignedManagerId))?.name
+                || (goalForm.assignedManagerId ? `Manager #${goalForm.assignedManagerId}` : 'Loading...')}
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={() => setShowCreateModal(false)} className="btn-secondary flex-1">Cancel</button>
             <button type="submit" disabled={submitting} className="btn-primary flex-1">
