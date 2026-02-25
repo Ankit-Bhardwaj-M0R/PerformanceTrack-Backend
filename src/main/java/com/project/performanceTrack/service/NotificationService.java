@@ -4,11 +4,16 @@ import com.project.performanceTrack.entity.Notification;
 import com.project.performanceTrack.entity.User;
 import com.project.performanceTrack.enums.NotificationStatus;
 import com.project.performanceTrack.enums.NotificationType;
+import com.project.performanceTrack.dto.NotificationResponseDTO;
 import com.project.performanceTrack.exception.ResourceNotFoundException;
 import com.project.performanceTrack.repository.NotificationRepository;
+import com.project.performanceTrack.config.MapperConfig;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +26,7 @@ public class    NotificationService {
 
     private final NotificationRepository notifRepo;
     private final SseEmitterService sseEmitterService;
+    private final ModelMapper modelMapper;
 
     public void sendNotification(User user, NotificationType type, String message,
                                  String entityType, Integer entityId,
@@ -49,22 +55,38 @@ public class    NotificationService {
         return notifRepo.findByUser_UserIdOrderByCreatedDateDesc(userId);
     }
 
-    // New - paginated
-    public Page<Notification> getNotifications(Integer userId, String status, Pageable pageable) {
+    public Page<NotificationResponseDTO> getNotifications(Integer userId, String status, Pageable pageable) {
+        // Force Latest First
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by("createdDate").descending()
+        );
+
+        Page<Notification> entityPage;
         if (status != null) {
             NotificationStatus notifStatus = NotificationStatus.valueOf(status.toUpperCase());
-            return notifRepo.findByUser_UserIdAndStatusOrderByCreatedDateDesc(userId, notifStatus, pageable);
+            entityPage = notifRepo.findByUser_UserIdAndStatus(userId, notifStatus, sortedPageable);
+        } else {
+            entityPage = notifRepo.findByUser_UserId(userId, sortedPageable);
         }
-        return notifRepo.findByUser_UserIdOrderByCreatedDateDesc(userId, pageable);
+
+        // Map Entity Page to DTO Page
+        return entityPage.map(notif -> {
+            NotificationResponseDTO dto = modelMapper.map(notif, NotificationResponseDTO.class);
+            dto.setUserId(notif.getUser().getUserId()); // Manually set to ensure correct ID
+            return dto;
+        });
     }
 
-    public Notification markAsRead(Integer notifId) {
+    public NotificationResponseDTO markAsRead(Integer notifId) {
         Notification notif = notifRepo.findById(notifId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
 
         notif.setStatus(NotificationStatus.READ);
         notif.setReadDate(LocalDateTime.now());
-        return notifRepo.save(notif);
+        Notification saved = notifRepo.save(notif);
+        return modelMapper.map(saved,NotificationResponseDTO.class);
     }
 
     @Transactional

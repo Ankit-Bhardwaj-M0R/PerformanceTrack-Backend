@@ -1,6 +1,7 @@
 package com.project.performanceTrack.controller;
 
 import com.project.performanceTrack.dto.ApiResponse;
+import com.project.performanceTrack.dto.NotificationResponseDTO;
 import com.project.performanceTrack.dto.PageResponse;
 import com.project.performanceTrack.entity.Notification;
 import com.project.performanceTrack.service.NotificationService;
@@ -22,8 +23,7 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
-
-    private final SseEmitterService sseEmitterService;                // <-- new
+    private final SseEmitterService sseEmitterService;
 
     // NEW - SSE stream endpoint
     @GetMapping("/stream")
@@ -33,23 +33,23 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ApiResponse<PageResponse<Notification>> getNotifications(
+    public ApiResponse<PageResponse<NotificationResponseDTO>> getNotifications(
             HttpServletRequest httpReq,
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
         Integer userId = (Integer) httpReq.getAttribute("userId");
-        Pageable pageable = PageRequest.of(page, Math.min(size, 100),
-                Sort.by("createdDate").descending());
+        // Default pageable (sorting here is a backup, Service forces it anyway)
+        Pageable pageable = PageRequest.of(page, Math.min(size, 100));
 
-        Page<Notification> notifications = notificationService.getNotifications(userId, status, pageable);
+        Page<NotificationResponseDTO> notifications = notificationService.getNotifications(userId, status, pageable);
         return ApiResponse.successPage("Notifications retrieved", notifications);
     }
 
     @PutMapping("/{notifId}")
-    public ApiResponse<Notification> markAsRead(@PathVariable Integer notifId) {
-        Notification updated = notificationService.markAsRead(notifId);
+    public ApiResponse<NotificationResponseDTO> markAsRead(@PathVariable Integer notifId) {
+        NotificationResponseDTO updated = notificationService.markAsRead(notifId);
         return ApiResponse.success("Notification marked as read", updated);
     }
 

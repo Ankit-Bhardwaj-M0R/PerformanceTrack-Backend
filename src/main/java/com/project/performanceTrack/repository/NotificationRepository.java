@@ -12,12 +12,11 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
 
-
-
-    List<Notification> findByUser_UserIdOrderByCreatedDateDesc(Integer userId);
     List<Notification> findByUser_UserIdAndStatusOrderByCreatedDateDesc(Integer userId, NotificationStatus status);
-
+    List<Notification> findByUser_UserIdOrderByCreatedDateDesc(Integer userId);
     // New - paginated versions
-    Page<Notification> findByUser_UserIdOrderByCreatedDateDesc(Integer userId, Pageable pageable);
-    Page<Notification> findByUser_UserIdAndStatusOrderByCreatedDateDesc(Integer userId, NotificationStatus status, Pageable pageable);
+    Page<Notification> findByUser_UserId(Integer userId, Pageable pageable);
+    Page<Notification> findByUser_UserIdAndStatus(Integer userId, NotificationStatus status, Pageable pageable);
+
+
 }

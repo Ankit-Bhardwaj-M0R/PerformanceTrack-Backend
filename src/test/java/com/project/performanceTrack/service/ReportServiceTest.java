@@ -1,5 +1,6 @@
 package com.project.performanceTrack.service;
 
+import com.project.performanceTrack.dto.ReportResponseDTO;
 import com.project.performanceTrack.entity.*;
 import com.project.performanceTrack.enums.GoalStatus;
 import com.project.performanceTrack.enums.PerformanceReviewStatus;
@@ -72,7 +73,7 @@ class ReportServiceTest {
     void getAllReports_ShouldReturnAll() {
         when(reportRepo.findAll()).thenReturn(Arrays.asList(testReport));
 
-        List<Report> result = reportService.getAllReports();
+        List<ReportResponseDTO> result = reportService.getAllReports();
 
         assertEquals(1, result.size());
     }
@@ -84,7 +85,7 @@ class ReportServiceTest {
     void getReportById_WithValidId_ShouldReturn() {
         when(reportRepo.findById(1)).thenReturn(Optional.of(testReport));
 
-        Report result = reportService.getReportById(1);
+        ReportResponseDTO result = reportService.getReportById(1);
 
         assertNotNull(result);
         assertEquals("PDF", result.getFormat());
@@ -110,7 +111,7 @@ class ReportServiceTest {
             return saved;
         });
 
-        Report result = reportService.generateReport("department", "{}", "PDF", 1);
+        ReportResponseDTO result = reportService.generateReport("department", "{}", "PDF", 1);
 
         assertNotNull(result);
         assertEquals("department", result.getScope());

@@ -1,5 +1,6 @@
 package com.project.performanceTrack.service;
 
+import com.project.performanceTrack.dto.ReportResponseDTO;
 import com.project.performanceTrack.entity.AuditLog;
 import com.project.performanceTrack.entity.Report;
 import com.project.performanceTrack.entity.User;
@@ -13,6 +14,7 @@ import com.project.performanceTrack.repository.AuditLogRepository;
 import com.project.performanceTrack.repository.GoalRepository;
 import com.project.performanceTrack.repository.PerformanceReviewRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,28 +31,24 @@ public class ReportService {
 
 
     private final ReportRepository reportRepo;
-
-
     private final UserRepository userRepo;
-
-
     private final AuditLogRepository auditRepo;
-
-
     private final GoalRepository goalRepo;
+    private final ModelMapper modelMapper;
 
 
     private final PerformanceReviewRepository reviewRepo;
 
-    // Get all reports
-    public List<Report> getAllReports() {
-        return reportRepo.findAll();
+    public List<ReportResponseDTO> getAllReports() {
+        return reportRepo.findAll().stream()
+                .map(report -> modelMapper.map(report, ReportResponseDTO.class))
+                .toList();
     }
 
-    // Get report by ID
-    public Report getReportById(Integer reportId) {
-        return reportRepo.findById(reportId)
+    public ReportResponseDTO getReportById(Integer reportId) {
+        Report report = reportRepo.findById(reportId)
                 .orElseThrow(() -> new ResourceNotFoundException("Report not found"));
+        return modelMapper.map(report, ReportResponseDTO.class);
     }
 
     // Get reports by user
@@ -59,11 +57,10 @@ public class ReportService {
     }
 
     // Generate report (Admin/Manager)
-    public Report generateReport(String scope, String metrics, String format, Integer userId) {
+    public ReportResponseDTO generateReport(String scope, String metrics, String format, Integer userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Create report
         Report report = new Report();
         report.setScope(scope);
         report.setMetrics(metrics);
@@ -71,11 +68,11 @@ public class ReportService {
         report.setGeneratedBy(user);
         report.setGeneratedDate(LocalDateTime.now());
         report.setFilePath("/reports/" + System.currentTimeMillis() + "." + format.toLowerCase());
+        report.setGeneratedBy(user);
+        report.setGeneratedDate(LocalDateTime.now());
 
-        // Save report
         Report saved = reportRepo.save(report);
 
-        // Create audit log
         AuditLog log = new AuditLog();
         log.setUser(user);
         log.setAction("REPORT_GENERATED");
@@ -86,7 +83,7 @@ public class ReportService {
         log.setTimestamp(LocalDateTime.now());
         auditRepo.save(log);
 
-        return saved;
+        return modelMapper.map(saved, ReportResponseDTO.class);
     }
 
     // Get dashboard metrics
