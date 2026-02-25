@@ -3,6 +3,7 @@ package com.project.performanceTrack.controller;
 import com.project.performanceTrack.dto.*;
 import com.project.performanceTrack.entity.Goal;
 import com.project.performanceTrack.service.GoalService;
+import com.project.performanceTrack.util.GoalMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +27,16 @@ public class GoalController {
     // Create goal (Employee)
     @PostMapping
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ApiResponse<Goal> createGoal(@Valid @RequestBody CreateGoalRequest req,
-                                        HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> createGoal(@Valid @RequestBody CreateGoalRequest req,
+                                                   HttpServletRequest httpReq) {
         Integer empId = (Integer) httpReq.getAttribute("userId");
         Goal goal = goalSvc.createGoal(req, empId);
-        return ApiResponse.success("Goal created", goal);
+        return ApiResponse.success("Goal created", GoalMapper.toDTO(goal));
     }
 
     // Get goals by user (Employee)
     @GetMapping
-    public ApiResponse<PageResponse<Goal>> getGoals(
+    public ApiResponse<PageResponse<GoalResponseDTO>> getGoals(
             HttpServletRequest httpReq,
             @RequestParam(required = false) Integer userId,
             @RequestParam(required = false) Integer mgrId,
@@ -64,81 +65,82 @@ public class GoalController {
                             goalSvc.getGoalsByUser(currentUserId, pageable);
         }
 
-        return ApiResponse.successPage("Goals retrieved", goals);
+        Page<GoalResponseDTO> dtoPage = goals.map(GoalMapper::toDTO);
+        return ApiResponse.successPage("Goals retrieved", dtoPage);
     }
 
     // Get goal by ID
     @GetMapping("/{goalId}")
-    public ApiResponse<Goal> getGoalById(@PathVariable Integer goalId) {
+    public ApiResponse<GoalResponseDTO> getGoalById(@PathVariable Integer goalId) {
         Goal goal = goalSvc.getGoalById(goalId);
-        return ApiResponse.success("Goal retrieved", goal);
+        return ApiResponse.success("Goal retrieved", GoalMapper.toDTO(goal));
     }
 
     // Approve goal (Manager)
     @PutMapping("/{goalId}/approve")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> approveGoal(@PathVariable Integer goalId,
-                                         HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> approveGoal(@PathVariable Integer goalId,
+                                                    HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         Goal goal = goalSvc.approveGoal(goalId, mgrId);
-        return ApiResponse.success("Goal approved", goal);
+        return ApiResponse.success("Goal approved", GoalMapper.toDTO(goal));
     }
 
     // Request changes (Manager)
     @PutMapping("/{goalId}/request-changes")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> requestChanges(@PathVariable Integer goalId,
-                                            @RequestBody Map<String, String> body,
-                                            HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> requestChanges(@PathVariable Integer goalId,
+                                                       @RequestBody Map<String, String> body,
+                                                       HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         String comments = body.get("comments");
         Goal goal = goalSvc.requestChanges(goalId, mgrId, comments);
-        return ApiResponse.success("Change request sent", goal);
+        return ApiResponse.success("Change request sent", GoalMapper.toDTO(goal));
     }
 
     // Submit completion (Employee)
     @PostMapping("/{goalId}/submit-completion")
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ApiResponse<Goal> submitCompletion(@PathVariable Integer goalId,
-                                              @Valid @RequestBody SubmitCompletionRequest req,
-                                              HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> submitCompletion(@PathVariable Integer goalId,
+                                                         @Valid @RequestBody SubmitCompletionRequest req,
+                                                         HttpServletRequest httpReq) {
         Integer empId = (Integer) httpReq.getAttribute("userId");
         Goal goal = goalSvc.submitCompletion(goalId, req, empId);
-        return ApiResponse.success("Completion submitted", goal);
+        return ApiResponse.success("Completion submitted", GoalMapper.toDTO(goal));
     }
 
     // Approve completion (Manager)
     @PostMapping("/{goalId}/approve-completion")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> approveCompletion(@PathVariable Integer goalId,
-                                               @RequestBody ApproveCompletionRequest req,
-                                               HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> approveCompletion(@PathVariable Integer goalId,
+                                                          @RequestBody ApproveCompletionRequest req,
+                                                          HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         Goal goal = goalSvc.approveCompletion(goalId, req, mgrId);
-        return ApiResponse.success("Completion approved", goal);
+        return ApiResponse.success("Completion approved", GoalMapper.toDTO(goal));
     }
 
     // Request additional evidence (Manager)
     @PostMapping("/{goalId}/request-additional-evidence")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> requestEvidence(@PathVariable Integer goalId,
-                                             @RequestBody Map<String, String> body,
-                                             HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> requestEvidence(@PathVariable Integer goalId,
+                                                        @RequestBody Map<String, String> body,
+                                                        HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         String reason = body.get("reason");
         Goal goal = goalSvc.requestAdditionalEvidence(goalId, mgrId, reason);
-        return ApiResponse.success("Additional evidence requested", goal);
+        return ApiResponse.success("Additional evidence requested", GoalMapper.toDTO(goal));
     }
 
     // Update goal (Employee - only when changes requested)
     @PutMapping("/{goalId}")
     @PreAuthorize("hasRole('EMPLOYEE')")
-    public ApiResponse<Goal> updateGoal(@PathVariable Integer goalId,
-                                        @Valid @RequestBody CreateGoalRequest req,
-                                        HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> updateGoal(@PathVariable Integer goalId,
+                                                   @Valid @RequestBody CreateGoalRequest req,
+                                                   HttpServletRequest httpReq) {
         Integer empId = (Integer) httpReq.getAttribute("userId");
         Goal goal = goalSvc.updateGoal(goalId, req, empId);
-        return ApiResponse.success("Goal updated", goal);
+        return ApiResponse.success("Goal updated", GoalMapper.toDTO(goal));
     }
 
     // Delete goal (soft delete)
@@ -154,26 +156,26 @@ public class GoalController {
     // Verify evidence (Manager)
     @PutMapping("/{goalId}/evidence/verify")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> verifyEvidence(@PathVariable Integer goalId,
-                                            @RequestBody Map<String, String> body,
-                                            HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> verifyEvidence(@PathVariable Integer goalId,
+                                                       @RequestBody Map<String, String> body,
+                                                       HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         String status = body.get("status");
         String notes = body.get("notes");
         Goal goal = goalSvc.verifyEvidence(goalId, mgrId, status, notes);
-        return ApiResponse.success("Evidence verified", goal);
+        return ApiResponse.success("Evidence verified", GoalMapper.toDTO(goal));
     }
 
     // Reject goal completion (Manager)
     @PostMapping("/{goalId}/reject-completion")
     @PreAuthorize("hasRole('MANAGER')")
-    public ApiResponse<Goal> rejectCompletion(@PathVariable Integer goalId,
-                                              @RequestBody Map<String, String> body,
-                                              HttpServletRequest httpReq) {
+    public ApiResponse<GoalResponseDTO> rejectCompletion(@PathVariable Integer goalId,
+                                                         @RequestBody Map<String, String> body,
+                                                         HttpServletRequest httpReq) {
         Integer mgrId = (Integer) httpReq.getAttribute("userId");
         String reason = body.get("reason");
         Goal goal = goalSvc.rejectCompletion(goalId, mgrId, reason);
-        return ApiResponse.success("Goal completion rejected", goal);
+        return ApiResponse.success("Goal completion rejected", GoalMapper.toDTO(goal));
     }
 
     // Add progress update (Employee)

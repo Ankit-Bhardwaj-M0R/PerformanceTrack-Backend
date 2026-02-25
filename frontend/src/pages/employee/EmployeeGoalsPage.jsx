@@ -133,11 +133,13 @@ export default function GoalsPage() {
   // ─── EMPLOYEE: Add Progress ───────────────────────────────────────────────
   const handleAddProgress = async (e) => {
     e.preventDefault()
+    if (!progressForm.notes.trim()) { toast.error('Progress notes are required'); return }
     setSubmitting(true)
     try {
-      await goalService.addProgress(selectedGoal.goalId, progressForm.notes, progressForm.progressPercentage)
+      await goalService.addProgress(selectedGoal.goalId, progressForm.notes)
       toast.success('Progress updated!')
       setShowProgressModal(false)
+      setProgressForm({ notes: '', progressPercentage: 50 })
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to update progress')
@@ -155,6 +157,7 @@ export default function GoalsPage() {
       await goalService.submitCompletion(selectedGoal.goalId, completionForm)
       toast.success('Goal submitted for completion review!')
       setShowCompletionModal(false)
+      setCompletionForm({ completionNotes: '', evidenceLink: '', evidenceLinkDescription: '' })
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to submit completion')
@@ -607,6 +610,7 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
     LOW: 'border-l-green-400',
   }
 
+  // Backend now returns flat GoalResponseDTO — assignedToUserId and assignedManagerId are top-level integers
   const isMyGoal = goal.assignedToUserId === user?.userId
   const isMyTeamGoal = goal.assignedManagerId === user?.userId
 
