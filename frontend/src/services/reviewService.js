@@ -44,7 +44,7 @@ export const reviewCycleService = {
       title: cycleData.title,
       startDt: cycleData.startDate,
       endDt: cycleData.endDate,
-      status: 'UPCOMING',
+      status: 'ACTIVE',
       reqCompAppr: cycleData.requiresCompletionApproval,
       evReq: cycleData.evidenceRequired,
     })
@@ -57,7 +57,7 @@ export const reviewCycleService = {
    * Backend CreateReviewCycleRequest fields: title, startDt, endDt, status, reqCompAppr, evReq
    * existingStatus: the current status of the cycle (preserved on update)
    */
-  updateCycle: async (cycleId, cycleData, existingStatus = 'UPCOMING') => {
+  updateCycle: async (cycleId, cycleData, existingStatus = 'ACTIVE') => {
     const response = await api.put(`/review-cycles/${cycleId}`, {
       title: cycleData.title,
       startDt: cycleData.startDate,
