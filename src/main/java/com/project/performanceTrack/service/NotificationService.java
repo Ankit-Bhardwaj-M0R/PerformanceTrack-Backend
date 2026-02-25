@@ -42,8 +42,12 @@ public class    NotificationService {
         notif.setActionRequired(actionReq);
         Notification saved = notifRepo.save(notif);
 
+        // Convert to DTO to avoid serializing nested User entity
+        NotificationResponseDTO dto = modelMapper.map(saved, NotificationResponseDTO.class);
+        dto.setUserId(user.getUserId());
+
         // Push to user in real-time if they're connected
-        sseEmitterService.sendToUser(user.getUserId(), saved);
+        sseEmitterService.sendToUser(user.getUserId(), dto);
     }
 
     // Existing - keep (used by markAllAsRead)

@@ -43,6 +43,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 log.warn("Invalid JWT token on {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
             }
         }
+        // SSE EventSource cannot send custom headers, so check query param for /stream endpoint
+        else if (request.getRequestURI().contains("/stream")) {
+            token = request.getParameter("token");
+            if (token != null) {
+                try {
+                    email = jwtUtil.extractEmail(token);
+                } catch (Exception e) {
+                    log.warn("Invalid JWT token in query param on {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+                }
+            }
+        }
 
         // Validate token and set authentication
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

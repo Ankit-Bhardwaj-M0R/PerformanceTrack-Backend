@@ -35,9 +35,8 @@ public class SseEmitterService {
         SseEmitter emitter = emitters.get(userId);
         if (emitter != null) {
             try {
-                emitter.send(SseEmitter.event()
-                        .name("notification")
-                        .data(data));
+                // Send without event name so frontend onmessage handler catches it
+                emitter.send(data);
             } catch (IOException e) {
                 emitters.remove(userId);
                 log.debug("SSE connection lost for userId: {}", userId);
