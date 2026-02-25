@@ -53,9 +53,9 @@ public class    NotificationService {
     public Page<Notification> getNotifications(Integer userId, String status, Pageable pageable) {
         if (status != null) {
             NotificationStatus notifStatus = NotificationStatus.valueOf(status.toUpperCase());
-            return notifRepo.findByUser_UserIdAndStatus(userId, notifStatus, pageable);
+            return notifRepo.findByUser_UserIdAndStatusOrderByCreatedDateDesc(userId, notifStatus, pageable);
         }
-        return notifRepo.findByUser_UserId(userId, pageable);
+        return notifRepo.findByUser_UserIdOrderByCreatedDateDesc(userId, pageable);
     }
 
     public Notification markAsRead(Integer notifId) {

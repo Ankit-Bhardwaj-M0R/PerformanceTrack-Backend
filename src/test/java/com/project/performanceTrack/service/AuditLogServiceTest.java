@@ -111,7 +111,7 @@ class AuditLogServiceTest {
     void getAuditLogs_Paginated_ByUserId() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<AuditLog> page = new PageImpl<>(Arrays.asList(testLog), pageable, 1);
-        when(auditRepo.findByUser_UserId(1, pageable)).thenReturn(page);
+        when(auditRepo.findByUser_UserIdOrderByTimestampDesc(1, pageable)).thenReturn(page);
 
         Page<AuditLog> result = auditLogService.getAuditLogs(1, null, null, null, pageable);
 
@@ -123,7 +123,7 @@ class AuditLogServiceTest {
     void getAuditLogs_Paginated_ByAction() {
         Pageable pageable = PageRequest.of(0, 10);
         Page<AuditLog> page = new PageImpl<>(Arrays.asList(testLog), pageable, 1);
-        when(auditRepo.findByAction("LOGIN", pageable)).thenReturn(page);
+        when(auditRepo.findByActionOrderByTimestampDesc("LOGIN", pageable)).thenReturn(page);
 
         Page<AuditLog> result = auditLogService.getAuditLogs(null, "LOGIN", null, null, pageable);
 
@@ -137,7 +137,7 @@ class AuditLogServiceTest {
         LocalDateTime start = LocalDateTime.of(2025, 1, 1, 0, 0);
         LocalDateTime end = LocalDateTime.of(2025, 12, 31, 23, 59);
         Page<AuditLog> page = new PageImpl<>(Arrays.asList(testLog), pageable, 1);
-        when(auditRepo.findByTimestampBetween(start, end, pageable)).thenReturn(page);
+        when(auditRepo.findByTimestampBetweenOrderByTimestampDesc(start, end, pageable)).thenReturn(page);
 
         Page<AuditLog> result = auditLogService.getAuditLogs(null, null, start, end, pageable);
 

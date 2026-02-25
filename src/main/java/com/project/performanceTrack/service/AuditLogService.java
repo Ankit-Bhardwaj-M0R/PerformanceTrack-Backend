@@ -62,11 +62,11 @@ public class AuditLogService {
                                        LocalDateTime startDt, LocalDateTime endDt,
                                        Pageable pageable) {
         if (userId != null) {
-            return auditRepo.findByUser_UserId(userId, pageable);
+            return auditRepo.findByUser_UserIdOrderByTimestampDesc(userId, pageable);
         } else if (action != null) {
-            return auditRepo.findByAction(action, pageable);
+            return auditRepo.findByActionOrderByTimestampDesc(action, pageable);
         } else if (startDt != null && endDt != null) {
-            return auditRepo.findByTimestampBetween(startDt, endDt, pageable);
+            return auditRepo.findByTimestampBetweenOrderByTimestampDesc(startDt, endDt, pageable);
         } else {
             return auditRepo.findAll(pageable);  // JpaRepository already has this
         }

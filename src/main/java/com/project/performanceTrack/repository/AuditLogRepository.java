@@ -23,7 +23,7 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Integer> {
     List<AuditLog> findByTimestampBetweenOrderByTimestampDesc(LocalDateTime start, LocalDateTime end);
 
     // New - paginated versions
-    Page<AuditLog> findByUser_UserId(Integer userId, Pageable pageable);
-    Page<AuditLog> findByAction(String action, Pageable pageable);
-    Page<AuditLog> findByTimestampBetween(LocalDateTime start, LocalDateTime end, Pageable pageable);
+    Page<AuditLog> findByUser_UserIdOrderByTimestampDesc(Integer userId, Pageable pageable);
+    Page<AuditLog> findByActionOrderByTimestampDesc(String action, Pageable pageable);
+    Page<AuditLog> findByTimestampBetweenOrderByTimestampDesc(LocalDateTime start, LocalDateTime end, Pageable pageable);
 }

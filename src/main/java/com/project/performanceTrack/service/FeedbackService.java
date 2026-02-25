@@ -28,9 +28,9 @@ public class FeedbackService {
      */
     public List<FeedbackResponseDTO> getFilteredFeedback(Integer goalId, Integer reviewId) {
         List<Feedback> feedbackList;
-        if (goalId != null) feedbackList = fbRepo.findByGoal_GoalId(goalId);
-        else if (reviewId != null) feedbackList = fbRepo.findByReview_ReviewId(reviewId);
-        else feedbackList = fbRepo.findAll();
+        if (goalId != null) feedbackList = fbRepo.findByGoal_GoalIdOrderByDateDesc(goalId);
+        else if (reviewId != null) feedbackList = fbRepo.findByReview_ReviewIdOrderByDateDesc(reviewId);
+        else feedbackList = fbRepo.findAllByOrderByDateDesc();
 
         return feedbackList.stream()
                 .map(fb -> modelMapper.map(fb, FeedbackResponseDTO.class))

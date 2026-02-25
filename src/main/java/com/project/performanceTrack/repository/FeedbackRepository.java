@@ -10,8 +10,9 @@ import java.util.List;
 public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
 
     // Find by goalId
-    List<Feedback> findByGoal_GoalId(Integer goalId);
+    List<Feedback> findByGoal_GoalIdOrderByDateDesc(Integer goalId);
 
     // Find by reviewId
-    List<Feedback> findByReview_ReviewId(Integer reviewId);
+    List<Feedback> findByReview_ReviewIdOrderByDateDesc(Integer reviewId);
+    List<Feedback> findAllByOrderByDateDesc();
 }
