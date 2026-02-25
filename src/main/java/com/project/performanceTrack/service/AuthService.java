@@ -47,7 +47,13 @@ public class AuthService {
         auditLogService.logAudit(user, "LOGIN", "User logged in successfully", null, null, "SUCCESS");
 
         log.info("User logged in successfully: {} (id={})", user.getEmail(), user.getUserId());
-        return new LoginResponse(token, user.getUserId(), user.getName(), user.getEmail(), user.getRole(), user.getDepartment());
+        if (user.getManager() != null) {
+            log.info("User's manager: {} (id={})", user.getManager().getEmail(), user.getManager().getUserId());
+            return new LoginResponse(token, user.getUserId(), user.getName(), user.getEmail(), user.getRole(), user.getDepartment(), user.getManager().getUserId());
+        } else {
+            log.info("User has no manager assigned: {} (id={})", user.getEmail(), user.getUserId());
+            return new LoginResponse(token, user.getUserId(), user.getName(), user.getEmail(), user.getRole(), user.getDepartment(), null);
+        }
     }
 
     // Locates the user by ID and records a "LOGOUT" event in the audit trail.

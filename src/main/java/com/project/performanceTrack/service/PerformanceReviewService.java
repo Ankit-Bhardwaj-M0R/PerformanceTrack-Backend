@@ -23,7 +23,6 @@ public class PerformanceReviewService {
     private final PerformanceReviewRepository reviewRepo;
     private final UserRepository userRepo;
     private final ReviewCycleRepository cycleRepo;
-    private final AuditLogRepository auditRepo;
     private final PerformanceReviewGoalsRepository reviewGoalsRepo;
     private final GoalRepository goalRepo;
     private final AuditLogService auditLogService; //updated

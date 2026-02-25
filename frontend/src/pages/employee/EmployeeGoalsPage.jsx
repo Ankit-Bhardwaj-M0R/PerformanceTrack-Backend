@@ -11,7 +11,6 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
 import { useAuth } from '../../context/AuthContext'
 import goalService from '../../services/goalService'
-import userService from '../../services/userService'
 import toast from 'react-hot-toast'
 
 // ─── GOALS PAGE ───────────────────────────────────────────────────────────────
@@ -44,7 +43,6 @@ export default function GoalsPage() {
 
   // ─── State ────────────────────────────────────────────────────────────────
   const [goals, setGoals] = useState([])
-  const [managers, setManagers] = useState([])   // For the "assign manager" dropdown
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -66,7 +64,7 @@ export default function GoalsPage() {
   // Form states
   const [goalForm, setGoalForm] = useState({
     title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM',
-    startDate: '', endDate: '', assignedManagerId: ''
+    startDate: '', endDate: '', assignedManagerId: user?.managerId || ''
   })
   const [progressForm, setProgressForm] = useState({ notes: '', progressPercentage: 50 })
   const [completionForm, setCompletionForm] = useState({
@@ -79,18 +77,6 @@ export default function GoalsPage() {
   // ─── Load Data ────────────────────────────────────────────────────────────
   useEffect(() => { loadGoals() }, [page])
 
-  useEffect(() => {
-    // Load managers list for the "create goal" form (employees need to pick a manager)
-    if (isEmployee()) loadManagers()
-  }, [])
-
-  // Auto-populate assignedManagerId as soon as the managers list is resolved.
-  // user.managerId is NOT present in LoginResponse, so managers[] is the only source.
-  useEffect(() => {
-    if (managers.length > 0 && !goalForm.assignedManagerId) {
-      setGoalForm(prev => ({ ...prev, assignedManagerId: managers[0].userId || '' }))
-    }
-  }, [managers])
 
   const loadGoals = async () => {
     setLoading(true)
@@ -107,23 +93,6 @@ export default function GoalsPage() {
     }
   }
 
-  const loadManagers = async () => {
-    try {
-      if (isEmployee()) {
-        // Employees can't call getAllUsers — directly fetch own profile to get assigned manager
-        const profile = await userService.getUserById(user.userId)
-        const mgr = profile?.manager
-        if (mgr?.userId) {
-          setManagers([mgr])
-          setGoalForm(prev => ({ ...prev, assignedManagerId: mgr.userId }))
-        }
-      } else {
-        const data = await userService.getAllUsers(0, 100)
-        const list = Array.isArray(data) ? data : (data?.content || [])
-        setManagers(list.filter(u => u.role === 'MANAGER' || u.role === 'ADMIN'))
-      }
-    } catch { /* silently fail */ }
-  }
 
   // ─── Client-side filter: status, priority, category, and search ─────────
   const filteredGoals = goals.filter(g => {
@@ -152,7 +121,7 @@ export default function GoalsPage() {
       await goalService.createGoal(goalForm)
       toast.success('Goal created successfully!')
       setShowCreateModal(false)
-      setGoalForm({ title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: managers[0]?.userId || '' })
+      setGoalForm({ title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: user?.managerId || '' })
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to create goal')
@@ -344,7 +313,7 @@ export default function GoalsPage() {
             onClick={() => {
               setGoalForm({
                 title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM',
-                startDate: '', endDate: '', assignedManagerId: managers[0]?.userId || ''
+                startDate: '', endDate: '', assignedManagerId: user?.managerId || ''
               })
               setShowCreateModal(true)
             }}
@@ -460,11 +429,10 @@ export default function GoalsPage() {
             </div>
           </div>
           {/* Manager is auto-assigned from the employee's profile */}
-          {managers.length > 0 && (
+          {user?.managerId && (
             <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-              <span className="font-medium">Assigned Manager: </span>
-              {managers.find(m => String(m.userId) === String(goalForm.assignedManagerId))?.name
-                || (goalForm.assignedManagerId ? `Manager #${goalForm.assignedManagerId}` : 'Loading...')}
+              <span className="font-medium">Assigned Manager ID: </span>
+              {user.managerId}
             </div>
           )}
           <div className="flex gap-3 pt-2">

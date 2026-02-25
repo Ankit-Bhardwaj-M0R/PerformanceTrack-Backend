@@ -15,8 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor

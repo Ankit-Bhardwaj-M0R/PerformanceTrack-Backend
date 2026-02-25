@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 // Feedback entity - stores feedback on goals/reviews
 @Entity
 @Table(name = "feedback")
