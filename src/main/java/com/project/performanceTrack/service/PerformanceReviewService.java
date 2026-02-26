@@ -27,6 +27,7 @@ public class PerformanceReviewService {
     private final GoalRepository goalRepo;
     private final AuditLogService auditLogService; //updated
     private final NotificationService notificationService;
+    private final FeedbackRepository fbRepo;
 
     //get reviews by user
     public List<PerformanceReview> getReviewsByUser(Integer userId){
@@ -104,6 +105,15 @@ public class PerformanceReviewService {
         // Centralized audit log
         auditLogService.logAudit(emp, "SELF_ASSESSMENT_SUBMITTED",
                 "Submitted self-assessment for " + cycle.getTitle(), "PerformanceReview", saved.getReviewId(), "SUCCESS");
+
+        //feedback
+        Feedback selfFb = new Feedback();
+        selfFb.setReview(saved);
+        selfFb.setGivenByUser(emp);
+        selfFb.setComments(req.getSelfAssmt());
+        selfFb.setFeedbackType("REVIEW_SELF_ASSESSMENT");
+        selfFb.setDate(LocalDateTime.now());
+        fbRepo.save(selfFb);
         return saved;
 
     }
@@ -173,6 +183,14 @@ public class PerformanceReviewService {
         auditLogService.logAudit(mgr, "MANAGER_REVIEW_COMPLETED",
                 "Completed review for " + review.getUser().getName(), "PerformanceReview", reviewId, "SUCCESS");
 
+        Feedback mgrFb = new Feedback();
+        mgrFb.setReview(saved);
+        mgrFb.setGivenByUser(mgr);
+        mgrFb.setComments("Rating: " + req.getMgrRating() + " | Feedback: " + req.getMgrFb());
+        mgrFb.setFeedbackType("REVIEW_MANAGER_VERDICT");
+        mgrFb.setDate(LocalDateTime.now());
+        fbRepo.save(mgrFb);
+
         return saved;
     }
 
@@ -209,6 +227,14 @@ public class PerformanceReviewService {
         //audit log
         auditLogService.logAudit(emp, "REVIEW_ACKNOWLEDGED",
                 "Acknowledged performance review", "PerformanceReview", reviewId, "SUCCESS");
+
+        Feedback ackFb = new Feedback();
+        ackFb.setReview(saved);
+        ackFb.setGivenByUser(emp);
+        ackFb.setComments(response);
+        ackFb.setFeedbackType("REVIEW_ACKNOWLEDGMENT");
+        ackFb.setDate(LocalDateTime.now());
+        fbRepo.save(ackFb);
 
         return saved;
 

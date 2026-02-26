@@ -164,7 +164,7 @@ public class GoalService {
         User mgr = userRepo.findById(mgrId).orElse(null);
         goal.setLastReviewedBy(mgr);
         goal.setLastReviewedDate(LocalDateTime.now());
-        Goal updated = goalRepo.save(goal);
+        goalRepo.save(goal);
 
         // Save feedback
         Feedback fb = new Feedback();
@@ -189,7 +189,7 @@ public class GoalService {
         // Audit log
         createAuditLog(mgr, "GOAL_CHANGE_REQUESTED", "Requested changes for goal: " + goal.getTitle(), "Goal", goalId);
 
-        return updated;
+        return goalRepo.save(goal);
     }
 
     // Submit goal completion with evidence (Employee)
@@ -260,9 +260,16 @@ public class GoalService {
         goal.setEvidenceLinkVerificationStatus(EvidenceVerificationStatus.VERIFIED);
         goal.setEvidenceLinkVerifiedBy(mgr);
         goal.setEvidenceLinkVerifiedDate(LocalDateTime.now());
-        Goal updated = goalRepo.save(goal);
+        goalRepo.save(goal);
 
         // Create GoalCompletionApproval record
+        Feedback finalFeedback = new Feedback();
+        finalFeedback.setGoal(goal);
+        finalFeedback.setGivenByUser(mgr);
+        finalFeedback.setComments(req.getMgrComments());
+        finalFeedback.setFeedbackType("FINAL_CLOSURE_APPROVE"); // The final word
+        finalFeedback.setDate(LocalDateTime.now());
+        fbRepo.save(finalFeedback);
         GoalCompletionApproval approval = new GoalCompletionApproval();
         approval.setGoal(goal);
         approval.setApprovalDecision("APPROVED");
@@ -287,7 +294,7 @@ public class GoalService {
         //Audit Log
         createAuditLog(mgr, "GOAL_COMPLETION_APPROVED", "Approved completion for goal: " + goal.getTitle(), "Goal", goalId);
 
-        return updated;
+        return goalRepo.save(goal);
     }
 
     // Request additional evidence (Manager)
@@ -305,6 +312,8 @@ public class GoalService {
         User mgr = userRepo.findById(mgrId).orElse(null);
         goal.setEvidenceLinkVerificationNotes(reason);
         Goal updated = goalRepo.save(goal);
+
+        //
 
         // Notify employee
         notificationService.sendNotification(
@@ -441,9 +450,14 @@ public class GoalService {
         // Update goal status back to in progress
         goal.setStatus(GoalStatus.IN_PROGRESS);
         goal.setCompletionApprovalStatus(CompletionApprovalStatus.REJECTED);
-        goal.setManagerCompletionComments(reason);
 
-        Goal updated = goalRepo.save(goal);
+        Feedback rejectFeedback = new Feedback();
+        rejectFeedback.setGoal(goal);
+        rejectFeedback.setGivenByUser(userRepo.findById(mgrId).get());
+        rejectFeedback.setComments(reason);
+        rejectFeedback.setFeedbackType("FINAL_CLOSURE_REJECT");
+        rejectFeedback.setDate(LocalDateTime.now());
+        fbRepo.save(rejectFeedback);
 
         // Create GoalCompletionApproval record for rejection
         GoalCompletionApproval approval = new GoalCompletionApproval();
@@ -470,7 +484,7 @@ public class GoalService {
         // Audit log
         createAuditLog(mgr, "GOAL_COMPLETION_REJECTED", "Rejected completion for goal: " + goal.getTitle(), "Goal", goalId);
 
-        return updated;
+        return goalRepo.save(goal);
     }
 
     // Add progress update (Employee)
