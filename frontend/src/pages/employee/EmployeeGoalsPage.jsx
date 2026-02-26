@@ -58,6 +58,7 @@ export default function GoalsPage() {
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [showActionModal, setShowActionModal] = useState(false)  // for approve/reject
   const [showEvidenceModal, setShowEvidenceModal] = useState(false)
+  const [showEditEvidenceModal, setShowEditEvidenceModal] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [actionType, setActionType] = useState('')  // 'APPROVE' | 'REJECT' | 'REQUEST_CHANGES' | etc.
 
@@ -161,6 +162,24 @@ export default function GoalsPage() {
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to submit completion')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // ─── EMPLOYEE: Resubmit Evidence ──────────────────────────────────────────
+  const handleResubmitEvidence = async (e) => {
+    e.preventDefault()
+    if (!completionForm.completionNotes) { toast.error('Completion notes are required'); return }
+    setSubmitting(true)
+    try {
+      await goalService.resubmitEvidence(selectedGoal.goalId, completionForm)
+      toast.success('Evidence resubmitted for review!')
+      setShowEditEvidenceModal(false)
+      setCompletionForm({ completionNotes: '', evidenceLink: '', evidenceLinkDescription: '' })
+      loadGoals()
+    } catch (err) {
+      toast.error(err.response?.data?.msg || 'Failed to resubmit evidence')
     } finally {
       setSubmitting(false)
     }
@@ -365,6 +384,15 @@ export default function GoalsPage() {
               isAdmin={isAdmin()}
               onAddProgress={() => { setSelectedGoal(goal); setShowProgressModal(true) }}
               onSubmitCompletion={() => { setSelectedGoal(goal); setShowCompletionModal(true) }}
+              onEditEvidence={() => {
+                setSelectedGoal(goal)
+                setCompletionForm({
+                  completionNotes: goal.completionNotes || '',
+                  evidenceLink: goal.evidenceLink || '',
+                  evidenceLinkDescription: goal.evidenceLinkDescription || ''
+                })
+                setShowEditEvidenceModal(true)
+              }}
               onApprove={() => openAction(goal, 'APPROVE')}
               onRequestChanges={() => openAction(goal, 'REQUEST_CHANGES')}
               onApproveCompletion={() => openAction(goal, 'APPROVE_COMPLETION')}
@@ -591,6 +619,42 @@ export default function GoalsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Evidence Modal (Employee - when additional evidence is requested) */}
+      <Modal isOpen={showEditEvidenceModal} onClose={() => setShowEditEvidenceModal(false)} title="Edit & Resubmit Evidence" size="lg">
+        <form onSubmit={handleResubmitEvidence} className="space-y-4">
+          {selectedGoal?.evidenceLinkVerificationNotes && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <p className="text-xs font-medium text-orange-700 mb-1">Manager's Feedback:</p>
+              <p className="text-sm text-orange-800">{selectedGoal.evidenceLinkVerificationNotes}</p>
+            </div>
+          )}
+          <div>
+            <label className="form-label">Completion Notes *</label>
+            <textarea className="input-field" rows={3} value={completionForm.completionNotes}
+              onChange={e => setCompletionForm({ ...completionForm, completionNotes: e.target.value })}
+              placeholder="Describe how you achieved this goal..." required />
+          </div>
+          <div>
+            <label className="form-label">Evidence Link</label>
+            <input className="input-field" value={completionForm.evidenceLink}
+              onChange={e => setCompletionForm({ ...completionForm, evidenceLink: e.target.value })}
+              placeholder="https://github.com/username/project or Google Drive link..." />
+          </div>
+          <div>
+            <label className="form-label">Evidence Description</label>
+            <input className="input-field" value={completionForm.evidenceLinkDescription}
+              onChange={e => setCompletionForm({ ...completionForm, evidenceLinkDescription: e.target.value })}
+              placeholder="What does the evidence link contain?" />
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setShowEditEvidenceModal(false)} className="btn-secondary flex-1">Cancel</button>
+            <button type="submit" disabled={submitting} className="btn-success flex-1">
+              {submitting ? 'Resubmitting...' : 'Resubmit Evidence'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </Layout>
   )
 }
@@ -598,7 +662,7 @@ export default function GoalsPage() {
 // ─── GOAL CARD COMPONENT ─────────────────────────────────────────────────────
 // Renders a single goal with all available actions based on status + role
 function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
-  onSubmitCompletion, onApprove, onRequestChanges, onApproveCompletion,
+  onSubmitCompletion, onEditEvidence, onApprove, onRequestChanges, onApproveCompletion,
   onRejectCompletion, onRequestEvidence, onVerifyEvidence, onDelete }) {
 
   const [expanded, setExpanded] = useState(false)
@@ -687,6 +751,12 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
               <button onClick={onSubmitCompletion}
                 className="btn-success text-xs py-1.5 px-3 flex items-center gap-1">
                 <Upload size={14} /> Submit Completion
+              </button>
+            )}
+            {goal.status === 'PENDING_COMPLETION_APPROVAL' && goal.completionApprovalStatus === 'ADDITIONAL_EVIDENCE_REQUIRED' && (
+              <button onClick={onEditEvidence}
+                className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1">
+                <Edit2 size={14} /> Edit Evidence
               </button>
             )}
             {(goal.status === 'PENDING') && (

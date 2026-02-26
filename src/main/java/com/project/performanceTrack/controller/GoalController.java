@@ -196,4 +196,15 @@ public class GoalController {
         String progress = goalSvc.getProgressUpdates(goalId);
         return ApiResponse.success("Progress retrieved", progress);
     }
+
+    // Resubmit evidence (Employee - when additional evidence is required)
+    @PutMapping("/{goalId}/resubmit-evidence")
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ApiResponse<GoalResponseDTO> resubmitEvidence(@PathVariable Integer goalId,
+                                                         @Valid @RequestBody SubmitCompletionRequest req,
+                                                         HttpServletRequest httpReq) {
+        Integer empId = (Integer) httpReq.getAttribute("userId");
+        Goal goal = goalSvc.resubmitEvidence(goalId, req, empId);
+        return ApiResponse.success("Evidence resubmitted successfully", GoalMapper.toDTO(goal));
+    }
 }

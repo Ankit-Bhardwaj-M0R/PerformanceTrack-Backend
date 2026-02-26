@@ -181,6 +181,20 @@ const goalService = {
     })
     return response.data
   },
+
+  /**
+   * PUT /api/v1/goals/{goalId}/resubmit-evidence
+   * Employee resubmits evidence when manager requests additional evidence.
+   * Backend SubmitCompletionRequest fields: evLink, linkDesc, compNotes
+   */
+  resubmitEvidence: async (goalId, completionData) => {
+    const response = await api.put(`/goals/${goalId}/resubmit-evidence`, {
+      evLink: completionData.evidenceLink,
+      linkDesc: completionData.evidenceLinkDescription,
+      compNotes: completionData.completionNotes,
+    })
+    return response.data
+  },
 }
 
 export default goalService
