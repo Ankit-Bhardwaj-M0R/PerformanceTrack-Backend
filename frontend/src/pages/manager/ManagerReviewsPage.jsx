@@ -37,7 +37,7 @@ const STATUS_FILTERS = [
   { value: '', label: 'All Statuses' },
   { value: 'PENDING', label: 'Pending' },
   { value: 'SELF_ASSESSMENT_COMPLETED', label: 'Self-Assessment Done' },
-  { value: 'MANAGER_REVIEW_COMPLETED', label: 'Manager Reviewed' },
+  { value: 'COMPLETED', label: 'Manager Reviewed' },
   { value: 'COMPLETED_AND_ACKNOWLEDGED', label: 'Acknowledged' },
 ]
 
@@ -154,7 +154,7 @@ export default function ManagerReviewsPage() {
   const pending   = filtered.filter(r => r.status === 'PENDING').length
   const awaitingReview = filtered.filter(r => r.status === 'SELF_ASSESSMENT_COMPLETED').length
   const done      = filtered.filter(r =>
-    r.status === 'MANAGER_REVIEW_COMPLETED' || r.status === 'COMPLETED_AND_ACKNOWLEDGED'
+    r.status === 'COMPLETED' || r.status === 'COMPLETED_AND_ACKNOWLEDGED'
   ).length
   const avgRating = (() => {
     const rated = filtered.filter(r => r.managerRating)

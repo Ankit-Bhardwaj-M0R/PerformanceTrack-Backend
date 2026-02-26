@@ -442,7 +442,7 @@ function ReviewCard({ review, user, isManager, isEmployee, onManagerReview, onAc
               <ClipboardList size={14} /> Review
             </button>
           )}
-          {isEmployee && isMyReview && review.status === 'MANAGER_REVIEW_COMPLETED' && (
+          {isEmployee && isMyReview && review.status === 'COMPLETED' && (
             <button onClick={onAcknowledge} className="btn-success text-xs py-1.5 px-3 flex items-center gap-1">
               <CheckCircle size={14} /> Acknowledge
             </button>

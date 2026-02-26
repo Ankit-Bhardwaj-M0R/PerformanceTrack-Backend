@@ -57,7 +57,7 @@ export default function EmployeeDashboard() {
       }
       if (reviewsRes.status === 'fulfilled') {
         const list = reviewsRes.value?.content || reviewsRes.value || []
-        setPendingReviews(list.filter(r => r.status === 'PENDING' || r.status === 'MANAGER_REVIEW_COMPLETED'))
+        setPendingReviews(list.filter(r => r.status === 'PENDING' || r.status === 'COMPLETED'))
       }
     } catch {
       setError('Failed to load dashboard data.')
@@ -175,7 +175,7 @@ export default function EmployeeDashboard() {
                 <ArrowRight size={16} className="text-gray-400 ml-auto" />
               </div>
             )}
-            {pendingReviews.filter(r => r.status === 'MANAGER_REVIEW_COMPLETED').length > 0 && (
+            {pendingReviews.filter(r => r.status === 'COMPLETED').length > 0 && (
               <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-100 rounded-lg cursor-pointer hover:bg-green-100 transition-colors" onClick={() => navigate('/reviews')}>
                 <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center"><CheckCircle size={16} className="text-green-600" /></div>
                 <div>
