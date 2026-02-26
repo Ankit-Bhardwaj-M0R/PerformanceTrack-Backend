@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { MessageSquare, Search, RefreshCw, Star, ThumbsUp, Wrench, Info } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import MetricChip from '../../components/common/MetricChip'
 import feedbackService from '../../services/feedbackService'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
@@ -20,15 +21,6 @@ function timeAgo(dateString) {
   if (!dateString) return ''
   try { return formatDistanceToNow(new Date(dateString), { addSuffix: true }) }
   catch { return dateString }
-}
-
-function MetricChip({ label, value, color }) {
-  return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <p className="text-2xl font-bold">{value ?? '—'}</p>
-      <p className="text-xs font-medium mt-0.5 opacity-80">{label}</p>
-    </div>
-  )
 }
 
 export default function EmployeeFeedbackPage() {

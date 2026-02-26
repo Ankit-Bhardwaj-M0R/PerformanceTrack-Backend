@@ -1,27 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { BarChart2, RefreshCw, Target, TrendingUp, Users, Award, Activity } from 'lucide-react'
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
-} from 'recharts'
 import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
+import KpiCard from '../../components/common/KpiCard'
+import { GoalStatusPieChart, GoalStatusBarChart, GoalCategoryPieChart, RatingBarChart, DeptBarChart } from '../../components/reports/Charts'
 import reportService from '../../services/reportService'
 import toast from 'react-hot-toast'
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316']
-
-function KpiCard({ label, value, icon: Icon, color }) {
-  return (
-    <div className="card">
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}>
-        <Icon size={20} />
-      </div>
-      <p className="text-2xl font-bold text-gray-800">{value ?? '—'}</p>
-      <p className="text-sm text-gray-500 mt-0.5">{label}</p>
-    </div>
-  )
-}
 
 export default function AdminReportsPage() {
   const [dashboard, setDashboard]         = useState(null)
@@ -143,16 +127,7 @@ export default function AdminReportsPage() {
           {goalStatusData.length > 0 && (
             <div className="card">
               <h3 className="section-title mb-4">Company-Wide Goal Status Distribution</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie data={goalStatusData} dataKey="value" nameKey="name"
-                    cx="50%" cy="50%" outerRadius={100}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {goalStatusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <GoalStatusPieChart data={goalStatusData} />
             </div>
           )}
 
@@ -200,17 +175,7 @@ export default function AdminReportsPage() {
           <div className="card">
             <h3 className="section-title mb-4">Goal Status Breakdown</h3>
             {goalStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={goalStatusData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {goalStatusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <GoalStatusBarChart data={goalStatusData} />
             ) : (
               <div className="text-center py-12 text-gray-400">
                 <BarChart2 size={40} className="mx-auto mb-2 opacity-50" />
@@ -223,19 +188,7 @@ export default function AdminReportsPage() {
           {goalAnalytics?.categoryBreakdown && (
             <div className="card">
               <h3 className="section-title mb-4">Goals by Category</h3>
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={Object.entries(goalAnalytics.categoryBreakdown).map(([name, value]) => ({ name, value }))}
-                    dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100}
-                    label={({ name, value }) => `${name}: ${value}`}>
-                    {Object.keys(goalAnalytics.categoryBreakdown).map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip /><Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <GoalCategoryPieChart categoryBreakdown={goalAnalytics.categoryBreakdown} />
             </div>
           )}
 
@@ -277,15 +230,7 @@ export default function AdminReportsPage() {
           {ratingDistribution.length > 0 ? (
             <div className="card">
               <h3 className="section-title mb-4">Rating Comparison (Self vs Manager)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={ratingDistribution}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="rating" />
-                  <YAxis domain={[0, 5]} />
-                  <Tooltip />
-                  <Bar dataKey="count" name="Rating (out of 5)" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <RatingBarChart data={ratingDistribution} yMax={5} fill="#3b82f6" />
             </div>
           ) : (
             <div className="card text-center py-16 text-gray-400">
@@ -305,17 +250,7 @@ export default function AdminReportsPage() {
               {/* Grouped Bar Chart */}
               <div className="card">
                 <h3 className="section-title mb-4">Cross-Department Comparison</h3>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={deptData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="dept" tick={{ fontSize: 12 }} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="avgRating"      name="Avg Rating"       fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="completedGoals" name="Completed Goals"  fill="#10b981" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <DeptBarChart data={deptData} />
               </div>
 
               {/* Department Table */}

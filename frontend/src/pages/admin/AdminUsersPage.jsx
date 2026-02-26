@@ -1,24 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Search, Users, Edit2, UserCheck, UserX } from 'lucide-react'
+import { Plus, Search, Users, Edit2 } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
-import Modal from '../../components/common/Modal'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
+import UserFormModal from '../../components/admin/UserFormModal'
 import { useAuth } from '../../context/AuthContext'
 import userService from '../../services/userService'
 import toast from 'react-hot-toast'
-
-// ─── USERS MANAGEMENT PAGE ────────────────────────────────────────────────────
-// ADMIN ONLY — Create and manage user accounts
-// APIs Used:
-//   GET  /api/v1/users
-//   GET  /api/v1/users/{id}
-//   POST /api/v1/users
-//   PUT  /api/v1/users/{id}
-// ─────────────────────────────────────────────────────────────────────────────
-
-const ROLES = ['ADMIN', 'MANAGER', 'EMPLOYEE']
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth()
@@ -188,75 +177,13 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}
-        title={editUser ? `Edit User: ${editUser.name}` : 'Create New User'} size="lg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">Full Name *</label>
-              <input className="input-field" value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                placeholder="John Doe" />
-            </div>
-            <div>
-              <label className="form-label">Email Address *</label>
-              <input type="email" className="input-field" value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                placeholder="john@company.com" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">{editUser ? 'New Password (leave blank to keep)' : 'Password *'}</label>
-              <input type="password" className="input-field" value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                placeholder={editUser ? 'Leave blank to keep current' : 'Min 8 characters'} />
-            </div>
-            <div>
-              <label className="form-label">Department</label>
-              <input className="input-field" value={form.department}
-                onChange={e => setForm({ ...form, department: e.target.value })}
-                placeholder="e.g., Engineering, Marketing" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">Role *</label>
-              <select className="input-field" value={form.role}
-                onChange={e => setForm({ ...form, role: e.target.value })}>
-                {ROLES.map(r => <option key={r}>{r}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="form-label">Status</label>
-              <select className="input-field" value={form.status}
-                onChange={e => setForm({ ...form, status: e.target.value })}>
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
-          </div>
-          {form.role === 'EMPLOYEE' && (
-            <div>
-              <label className="form-label">Assign Manager</label>
-              <select className="input-field" value={form.managerId}
-                onChange={e => setForm({ ...form, managerId: e.target.value })}>
-                <option value="">No manager assigned</option>
-                {managers.map(m => (
-                  <option key={m.userId} value={m.userId}>{m.name} — {m.department}</option>
-                ))}
-              </select>
-            </div>
-          )}
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowModal(false)} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1">
-              {submitting ? 'Saving...' : editUser ? 'Update User' : 'Create User'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <UserFormModal
+        isOpen={showModal} onClose={() => setShowModal(false)}
+        editUser={editUser}
+        form={form} setForm={setForm}
+        managers={managers}
+        onSubmit={handleSubmit} submitting={submitting}
+      />
     </Layout>
   )
 }

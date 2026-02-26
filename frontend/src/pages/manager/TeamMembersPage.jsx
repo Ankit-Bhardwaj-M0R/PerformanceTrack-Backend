@@ -4,29 +4,14 @@ import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import Modal from '../../components/common/Modal'
 import StatusBadge from '../../components/common/StatusBadge'
+import MetricChip from '../../components/common/MetricChip'
+import Avatar from '../../components/common/Avatar'
+import EmptyState from '../../components/common/EmptyState'
 import { useAuth } from '../../context/AuthContext'
 import userService from '../../services/userService'
 import goalService from '../../services/goalService'
 import { performanceReviewService } from '../../services/reviewService'
 import toast from 'react-hot-toast'
-
-function MetricChip({ label, value, color }) {
-  return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <p className="text-2xl font-bold">{value ?? '—'}</p>
-      <p className="text-xs font-medium mt-0.5 opacity-80">{label}</p>
-    </div>
-  )
-}
-
-function Avatar({ name, size = 'md' }) {
-  const sizeClass = size === 'lg' ? 'w-14 h-14 text-xl' : 'w-9 h-9 text-sm'
-  return (
-    <div className={`${sizeClass} bg-purple-500 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}>
-      {name?.charAt(0)?.toUpperCase() || 'U'}
-    </div>
-  )
-}
 
 export default function TeamMembersPage() {
   const { user } = useAuth()
@@ -132,11 +117,7 @@ export default function TeamMembersPage() {
       {loading ? (
         <LoadingSpinner message="Loading team members..." />
       ) : filtered.length === 0 ? (
-        <div className="card text-center py-16">
-          <Users size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">No team members found</p>
-          <p className="text-gray-400 text-sm mt-1">Try adjusting your search or filters.</p>
-        </div>
+        <EmptyState icon={Users} title="No team members found" subtitle="Try adjusting your search or filters." />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(member => (

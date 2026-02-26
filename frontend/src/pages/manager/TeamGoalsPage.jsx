@@ -1,38 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Target, Search, CheckCircle, XCircle, MessageSquare,
-  Eye, ChevronDown, RefreshCw, Filter,
-} from 'lucide-react'
+import { Target, RefreshCw, CheckCircle, XCircle, MessageSquare, Eye } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import StatusBadge from '../../components/common/StatusBadge'
-import Modal from '../../components/common/Modal'
 import Pagination from '../../components/common/Pagination'
+import MetricChip from '../../components/common/MetricChip'
+import EmptyState from '../../components/common/EmptyState'
+import GoalFiltersBar from '../../components/goals/GoalFiltersBar'
+import ManagerActionModal from '../../components/goals/ManagerActionModal'
+import EvidenceModal from '../../components/goals/EvidenceModal'
 import goalService from '../../services/goalService'
 import userService from '../../services/userService'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
-const STATUS_OPTIONS = [
-  { value: '', label: 'All Statuses' },
-  { value: 'PENDING', label: 'Pending Approval' },
-  { value: 'IN_PROGRESS', label: 'In Progress' },
-  { value: 'PENDING_COMPLETION_APPROVAL', label: 'Pending Completion' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'REJECTED', label: 'Rejected' },
-]
-
-const PRIORITY_OPTIONS = ['', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
-const CATEGORY_OPTIONS = ['', 'TECHNICAL', 'BEHAVIORAL', 'PROFESSIONAL_DEVELOPMENT', 'OTHER']
-
-function MetricChip({ label, value, color }) {
-  return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <p className="text-2xl font-bold">{value ?? '—'}</p>
-      <p className="text-xs font-medium mt-0.5 opacity-80">{label}</p>
-    </div>
-  )
-}
 
 export default function TeamGoalsPage() {
   const { user } = useAuth()
@@ -164,12 +145,6 @@ export default function TeamGoalsPage() {
     }
   }
 
-  const actionTitles = {
-    APPROVE: 'Approve Goal', REQUEST_CHANGES: 'Request Changes',
-    APPROVE_COMPLETION: 'Approve Completion', REJECT_COMPLETION: 'Reject Completion',
-    REQUEST_EVIDENCE: 'Request Additional Evidence',
-  }
-
   const hasActiveFilters = statusFilter || priorityFilter || categoryFilter || searchTerm
 
   return (
@@ -182,59 +157,24 @@ export default function TeamGoalsPage() {
         <MetricChip label="Completed"           value={completed}        color="bg-green-50 text-green-700" />
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by title or employee name..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="input-field pl-9"
-          />
-        </div>
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="input-field w-auto">
-          {STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)} className="input-field w-auto">
-          <option value="">All Priorities</option>
-          {PRIORITY_OPTIONS.filter(Boolean).map(p => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className="input-field w-auto">
-          <option value="">All Categories</option>
-          {CATEGORY_OPTIONS.filter(Boolean).map(c => <option key={c} value={c}>{c}</option>)}
-        </select>
-        {hasActiveFilters && (
-          <button onClick={() => { setStatusFilter(''); setPriorityFilter(''); setCategoryFilter(''); setSearchTerm('') }}
-            className="btn-secondary text-xs px-3">
-            Clear
+      <GoalFiltersBar
+        searchTerm={searchTerm} setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+        priorityFilter={priorityFilter} setPriorityFilter={setPriorityFilter}
+        categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
+        onClear={() => { setStatusFilter(''); setPriorityFilter(''); setCategoryFilter(''); setSearchTerm('') }}
+        extra={
+          <button onClick={loadGoals} className="btn-secondary p-2" title="Refresh">
+            <RefreshCw size={16} />
           </button>
-        )}
-        <button onClick={loadGoals} className="btn-secondary p-2">
-          <RefreshCw size={16} />
-        </button>
-      </div>
-
-      {/* Active filter chips */}
-      {hasActiveFilters && (
-        <div className="flex flex-wrap gap-2 mb-4 text-xs">
-          {statusFilter && <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Status: {STATUS_OPTIONS.find(o => o.value === statusFilter)?.label}</span>}
-          {priorityFilter && <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Priority: {priorityFilter}</span>}
-          {categoryFilter && <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Category: {categoryFilter}</span>}
-          <span className="text-gray-500 self-center">{filtered.length} result{filtered.length !== 1 ? 's' : ''} on this page</span>
-        </div>
-      )}
+        }
+      />
 
       {/* Goals Table */}
       {loading ? (
         <LoadingSpinner message="Loading team goals..." />
       ) : filtered.length === 0 ? (
-        <div className="card text-center py-16">
-          <Target size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">No team goals found</p>
-          <p className="text-gray-400 text-sm mt-1">Try adjusting your filters.</p>
-        </div>
+        <EmptyState icon={Target} title="No team goals found" subtitle="Try adjusting your filters." />
       ) : (
         <div className="card p-0 overflow-hidden">
           <div className="overflow-x-auto">
@@ -270,73 +210,18 @@ export default function TeamGoalsPage() {
         </div>
       )}
 
-      {/* Manager Action Modal */}
-      <Modal isOpen={showActionModal} onClose={() => setShowActionModal(false)} title={actionTitles[actionType] || 'Action'}>
-        <form onSubmit={handleManagerAction} className="space-y-4">
-          <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">Goal: <strong>{selectedGoal?.title}</strong></p>
-          {actionType === 'APPROVE' ? (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700">
-              This will approve the goal and allow the employee to start working on it.
-            </div>
-          ) : (
-            <div>
-              <label className="form-label">{actionType === 'REQUEST_EVIDENCE' ? 'Message to Employee *' : 'Comments / Reason *'}</label>
-              <textarea
-                className="input-field" rows={4}
-                value={actionType === 'REQUEST_EVIDENCE' ? actionForm.message : actionForm.comments}
-                onChange={e => setActionForm(
-                  actionType === 'REQUEST_EVIDENCE'
-                    ? { ...actionForm, message: e.target.value }
-                    : { ...actionForm, comments: e.target.value }
-                )}
-                placeholder="Enter your comments..."
-              />
-            </div>
-          )}
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setShowActionModal(false)} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={submitting}
-              className={`flex-1 ${actionType === 'REJECT_COMPLETION' ? 'btn-danger' : actionType === 'APPROVE' || actionType === 'APPROVE_COMPLETION' ? 'btn-success' : 'btn-primary'}`}>
-              {submitting ? 'Processing...' : actionTitles[actionType]}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <ManagerActionModal
+        isOpen={showActionModal} onClose={() => setShowActionModal(false)}
+        actionType={actionType} goal={selectedGoal}
+        form={actionForm} setForm={setActionForm}
+        onSubmit={handleManagerAction} submitting={submitting}
+      />
 
-      {/* Verify Evidence Modal */}
-      <Modal isOpen={showEvidenceModal} onClose={() => setShowEvidenceModal(false)} title="Verify Evidence">
-        <form onSubmit={handleVerifyEvidence} className="space-y-4">
-          {selectedGoal?.evidenceLink && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs font-medium text-blue-700 mb-1">Evidence Link:</p>
-              <a href={selectedGoal.evidenceLink} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
-                {selectedGoal.evidenceLink}
-              </a>
-            </div>
-          )}
-          <div>
-            <label className="form-label">Verification Decision</label>
-            <select className="input-field" value={evidenceForm.verificationStatus}
-              onChange={e => setEvidenceForm({ ...evidenceForm, verificationStatus: e.target.value })}>
-              <option value="VERIFIED">Verified — Evidence is acceptable</option>
-              <option value="NEEDS_ADDITIONAL_LINK">Needs Additional Link — More work needed</option>
-              <option value="REJECTED">Rejected — Does not meet requirements</option>
-            </select>
-          </div>
-          <div>
-            <label className="form-label">Notes</label>
-            <textarea className="input-field" rows={3} value={evidenceForm.notes}
-              onChange={e => setEvidenceForm({ ...evidenceForm, notes: e.target.value })}
-              placeholder="Add notes about your verification..." />
-          </div>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setShowEvidenceModal(false)} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1">
-              {submitting ? 'Submitting...' : 'Submit Verification'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      <EvidenceModal
+        isOpen={showEvidenceModal} onClose={() => setShowEvidenceModal(false)}
+        goal={selectedGoal} form={evidenceForm} setForm={setEvidenceForm}
+        onSubmit={handleVerifyEvidence} submitting={submitting}
+      />
     </Layout>
   )
 }

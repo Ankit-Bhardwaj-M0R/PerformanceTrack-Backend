@@ -1,37 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { ClipboardList, Eye, Search, RefreshCw } from 'lucide-react'
 import Layout from '../../components/layout/Layout'
-import Modal from '../../components/common/Modal'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
+import MetricChip from '../../components/common/MetricChip'
+import EmptyState from '../../components/common/EmptyState'
+import ManagerReviewModal from '../../components/reviews/ManagerReviewModal'
+import ReviewDetailModal from '../../components/reviews/ReviewDetailModal'
 import { performanceReviewService, reviewCycleService } from '../../services/reviewService'
 import userService from '../../services/userService'
 import { useAuth } from '../../context/AuthContext'
 import toast from 'react-hot-toast'
 
-function MetricChip({ label, value, color }) {
-  return (
-    <div className={`rounded-xl p-4 ${color}`}>
-      <p className="text-2xl font-bold">{value ?? '—'}</p>
-      <p className="text-xs font-medium mt-0.5 opacity-80">{label}</p>
-    </div>
-  )
-}
-
-function StarRating({ value, onChange }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map(star => (
-        <button key={star} type="button" onClick={() => onChange && onChange(star)}
-          className={`text-2xl transition-colors cursor-pointer ${star <= value ? 'text-yellow-400' : 'text-gray-200'} hover:text-yellow-300`}>
-          ★
-        </button>
-      ))}
-      <span className="ml-2 text-sm text-gray-500 self-center">{value}/5</span>
-    </div>
-  )
-}
 
 const STATUS_FILTERS = [
   { value: '', label: 'All Statuses' },
@@ -190,9 +171,7 @@ export default function ManagerReviewsPage() {
         <MetricChip label="Pending Self-Assmt" value={pending}       color="bg-gray-50 text-gray-600" />
         <MetricChip label="Awaiting My Review" value={awaitingReview} color="bg-yellow-50 text-yellow-700" />
         <MetricChip label="Completed"          value={done}          color="bg-green-50 text-green-700" />
-      </div>
-
-      {/* Filters row */}
+      </div>      {/* Filters row */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6 flex-wrap">
         {/* Cycle selector */}
         <select
@@ -261,13 +240,11 @@ export default function ManagerReviewsPage() {
       {loading ? (
         <LoadingSpinner message="Loading reviews..." />
       ) : filtered.length === 0 ? (
-        <div className="card text-center py-16">
-          <ClipboardList size={48} className="mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">No reviews found</p>
-          <p className="text-gray-400 text-sm mt-1">
-            {!selectedCycle ? 'Select a review cycle above.' : 'No reviews match your filters.'}
-          </p>
-        </div>
+        <EmptyState
+          icon={ClipboardList}
+          title="No reviews found"
+          subtitle={!selectedCycle ? 'Select a review cycle above.' : 'No reviews match your filters.'}
+        />
       ) : (
         <div className="card p-0 overflow-hidden">
           <div className="overflow-x-auto">
@@ -330,107 +307,18 @@ export default function ManagerReviewsPage() {
         </div>
       )}
 
-      {/* Submit Manager Review Modal */}
-      <Modal isOpen={showReviewModal} onClose={() => setShowReviewModal(false)} title="Submit Manager Review" size="lg">
-        <form onSubmit={handleManagerReview} className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-3 text-sm">
-            <p className="font-medium text-gray-700">Employee: <span className="text-blue-700 font-semibold">{getEmployeeName(selectedReview)}</span></p>
-          </div>
-          {selectedReview?.selfAssessment && (
-            <div className="bg-blue-50 rounded-lg p-3 text-sm">
-              <p className="font-medium text-blue-700 mb-1">Self-Assessment:</p>
-              <p className="text-gray-600">{selectedReview.selfAssessment}</p>
-              {selectedReview.employeeSelfRating && (
-                <p className="text-xs text-blue-500 mt-1">Self Rating: {selectedReview.employeeSelfRating}/5</p>
-              )}
-            </div>
-          )}
-          <div>
-            <label className="form-label">Manager Feedback *</label>
-            <textarea className="input-field" rows={5}
-              value={managerForm.managerFeedback}
-              onChange={e => setManagerForm({ ...managerForm, managerFeedback: e.target.value })}
-              placeholder="Provide detailed feedback on this employee's performance..." />
-          </div>
-          <div>
-            <label className="form-label">Performance Rating</label>
-            <div className="mt-2">
-              <StarRating value={managerForm.managerRating} onChange={v => setManagerForm({ ...managerForm, managerRating: v })} />
-            </div>
-          </div>
-          <div>
-            <label className="form-label">Rating Justification *</label>
-            <textarea className="input-field" rows={3}
-              value={managerForm.ratingJustification}
-              onChange={e => setManagerForm({ ...managerForm, ratingJustification: e.target.value })}
-              placeholder="Explain why you gave this rating..." />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="form-label">Compensation Recommendations</label>
-              <input className="input-field" value={managerForm.compensationRecommendations}
-                onChange={e => setManagerForm({ ...managerForm, compensationRecommendations: e.target.value })}
-                placeholder="e.g., 10% salary increase" />
-            </div>
-            <div>
-              <label className="form-label">Goals for Next Period</label>
-              <input className="input-field" value={managerForm.nextPeriodGoals}
-                onChange={e => setManagerForm({ ...managerForm, nextPeriodGoals: e.target.value })}
-                placeholder="Suggest next-cycle goals" />
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button type="button" onClick={() => setShowReviewModal(false)} className="btn-secondary flex-1">Cancel</button>
-            <button type="submit" disabled={submitting} className="btn-primary flex-1">
-              {submitting ? 'Submitting...' : 'Submit Review'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      {/* Modals */}
+      <ManagerReviewModal
+        isOpen={showReviewModal} onClose={() => setShowReviewModal(false)}
+        review={selectedReview} employeeName={getEmployeeName(selectedReview)}
+        form={managerForm} setForm={setManagerForm}
+        onSubmit={handleManagerReview} submitting={submitting}
+      />
 
-      {/* View Review Details Modal */}
-      <Modal isOpen={showViewModal} onClose={() => setShowViewModal(false)} title="Review Details" size="lg">
-        {selectedReview && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 flex-wrap">
-              <StatusBadge status={selectedReview.status} />
-              <span className="font-medium text-gray-700">{getEmployeeName(selectedReview)}</span>
-              <span className="text-sm text-gray-500">{getCycleName(selectedReview)}</span>
-            </div>
-            {selectedReview.selfAssessment && (
-              <div className="bg-blue-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-blue-700 uppercase mb-2">Self-Assessment</p>
-                <p className="text-sm text-gray-700">{selectedReview.selfAssessment}</p>
-                {selectedReview.employeeSelfRating && (
-                  <p className="text-xs text-blue-500 mt-2">Self Rating: {selectedReview.employeeSelfRating}/5</p>
-                )}
-              </div>
-            )}
-            {selectedReview.managerFeedback && (
-              <div className="bg-green-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-green-700 uppercase mb-2">Manager Review</p>
-                <p className="text-sm text-gray-700">{selectedReview.managerFeedback}</p>
-                {selectedReview.managerRating && (
-                  <p className="text-xs text-green-600 mt-2">Manager Rating: {selectedReview.managerRating}/5</p>
-                )}
-                {selectedReview.ratingJustification && (
-                  <p className="text-xs text-gray-500 mt-1">Justification: {selectedReview.ratingJustification}</p>
-                )}
-                {selectedReview.compensationRecommendations && (
-                  <p className="text-xs text-gray-500 mt-1">Compensation: {selectedReview.compensationRecommendations}</p>
-                )}
-              </div>
-            )}
-            {selectedReview.employeeResponse && (
-              <div className="bg-purple-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-purple-700 uppercase mb-2">Employee Response</p>
-                <p className="text-sm text-gray-700">{selectedReview.employeeResponse}</p>
-              </div>
-            )}
-            <button onClick={() => setShowViewModal(false)} className="btn-secondary w-full">Close</button>
-          </div>
-        )}
-      </Modal>
+      <ReviewDetailModal
+        isOpen={showViewModal} onClose={() => setShowViewModal(false)}
+        review={selectedReview}
+      />
     </Layout>
   )
 }
