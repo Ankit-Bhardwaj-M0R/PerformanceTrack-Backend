@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { BarChart2, Download, RefreshCw, Target, TrendingUp, Users, Award } from 'lucide-react'
+import { BarChart2, RefreshCw, Target, TrendingUp, Users, Award } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -28,7 +28,6 @@ export default function TeamReportsPage() {
   const [goalAnalytics, setGoalAnalytics] = useState(null)
   const [perfSummary, setPerfSummary]   = useState(null)
   const [loading, setLoading]           = useState(true)
-  const [generating, setGenerating]     = useState(false)
   const [activeTab, setActiveTab]       = useState('overview')
 
   useEffect(() => { loadAll() }, [])
@@ -48,18 +47,6 @@ export default function TeamReportsPage() {
       toast.error('Failed to load team reports')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleGenerateReport = async (scope) => {
-    setGenerating(true)
-    try {
-      await reportService.generateReport(scope, 'JSON')
-      toast.success(`${scope} report generated!`)
-    } catch (err) {
-      toast.error(err.response?.data?.msg || 'Report generation failed')
-    } finally {
-      setGenerating(false)
     }
   }
 
@@ -100,17 +87,9 @@ export default function TeamReportsPage() {
 
   return (
     <Layout title="Team Reports">
-      {/* Generate Buttons */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        {['TEAM', 'DEPARTMENT'].map(scope => (
-          <button key={scope} onClick={() => handleGenerateReport(scope)}
-            disabled={generating}
-            className="btn-secondary flex items-center gap-2 text-sm">
-            <Download size={16} />
-            {generating ? 'Generating...' : `Generate ${scope} Report`}
-          </button>
-        ))}
-        <button onClick={loadAll} className="btn-secondary p-2 ml-auto"><RefreshCw size={16} /></button>
+      {/* Page Header Actions */}
+      <div className="flex justify-end mb-6">
+        <button onClick={loadAll} className="btn-secondary p-2"><RefreshCw size={16} /></button>
       </div>
 
       {/* Tabs */}

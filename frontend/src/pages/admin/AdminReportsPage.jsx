@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { BarChart2, Download, RefreshCw, Target, TrendingUp, Users, Award, Activity } from 'lucide-react'
+import { BarChart2, RefreshCw, Target, TrendingUp, Users, Award, Activity } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -29,7 +29,6 @@ export default function AdminReportsPage() {
   const [perfSummary, setPerfSummary]     = useState(null)
   const [deptPerformance, setDeptPerformance] = useState(null)
   const [loading, setLoading]             = useState(true)
-  const [generating, setGenerating]       = useState(false)
   const [activeTab, setActiveTab]         = useState('overview')
 
   useEffect(() => { loadAll() }, [])
@@ -51,18 +50,6 @@ export default function AdminReportsPage() {
       toast.error('Failed to load analytics data')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleGenerateReport = async (scope) => {
-    setGenerating(true)
-    try {
-      await reportService.generateReport(scope, 'JSON')
-      toast.success(`${scope} report generated!`)
-    } catch (err) {
-      toast.error(err.response?.data?.msg || 'Report generation failed')
-    } finally {
-      setGenerating(false)
     }
   }
 
@@ -126,16 +113,9 @@ export default function AdminReportsPage() {
 
   return (
     <Layout title="Reports & Analytics">
-      {/* Generate Buttons */}
-      <div className="flex gap-3 mb-6 flex-wrap">
-        {['TEAM', 'DEPARTMENT', 'COMPANY'].map(scope => (
-          <button key={scope} onClick={() => handleGenerateReport(scope)} disabled={generating}
-            className="btn-secondary flex items-center gap-2 text-sm">
-            <Download size={16} />
-            {generating ? 'Generating...' : `Generate ${scope} Report`}
-          </button>
-        ))}
-        <button onClick={loadAll} className="btn-secondary p-2 ml-auto"><RefreshCw size={16} /></button>
+      {/* Page Header Actions */}
+      <div className="flex justify-end mb-6">
+        <button onClick={loadAll} className="btn-secondary p-2"><RefreshCw size={16} /></button>
       </div>
 
       {/* Tabs */}
