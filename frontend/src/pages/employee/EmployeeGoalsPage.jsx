@@ -490,13 +490,13 @@ export default function GoalsPage() {
               placeholder="Describe how you completed this goal and what you achieved..." />
           </div>
           <div>
-            <label className="form-label">Evidence Link (optional)</label>
+            <label className="form-label">Evidence Link *</label>
             <input className="input-field" value={completionForm.evidenceLink}
               onChange={e => setCompletionForm({ ...completionForm, evidenceLink: e.target.value })}
               placeholder="https://docs.google.com/... or https://github.com/..." />
           </div>
           <div>
-            <label className="form-label">Evidence Description</label>
+            <label className="form-label">Evidence Description *</label>
             <input className="input-field" value={completionForm.evidenceLinkDescription}
               onChange={e => setCompletionForm({ ...completionForm, evidenceLinkDescription: e.target.value })}
               placeholder="What does the evidence link contain?" />
