@@ -443,7 +443,11 @@ export default function GoalsPage() {
               onApproveCompletion={() => openAction(goal, 'APPROVE_COMPLETION')}
               onRejectCompletion={() => openAction(goal, 'REJECT_COMPLETION')}
               onRequestEvidence={() => openAction(goal, 'REQUEST_EVIDENCE')}
-              onVerifyEvidence={() => { setSelectedGoal(goal); setShowEvidenceModal(true) }}
+              onVerifyEvidence={() => { 
+                setSelectedGoal(goal); 
+                setEvidenceForm({ verificationStatus: 'VERIFIED', notes: '' });
+                setShowEvidenceModal(true);
+              }}
               onDelete={() => handleDelete(goal)}
             />
           ))}
@@ -916,24 +920,46 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
             )}
             {goal.status === 'PENDING_COMPLETION_APPROVAL' && (
               <>
-                {goal.evidenceLink && (
+                {goal.evidenceLink && !goal.evidenceLinkVerificationStatus && (
                   <button onClick={onVerifyEvidence}
                     className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1">
                     <Eye size={14} /> Verify Evidence
                   </button>
                 )}
-                <button onClick={onApproveCompletion}
-                  className="btn-success text-xs py-1.5 px-3 flex items-center gap-1">
-                  <CheckCircle size={14} /> Approve
-                </button>
-                <button onClick={onRejectCompletion}
-                  className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1">
-                  <XCircle size={14} /> Reject
-                </button>
-                <button onClick={onRequestEvidence}
-                  className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1">
-                  <MessageSquare size={14} /> Request Evidence
-                </button>
+                {goal.evidenceLinkVerificationStatus && (
+                  <>
+                    <button 
+                      onClick={onApproveCompletion}
+                      disabled={goal.evidenceLinkVerificationStatus !== 'VERIFIED'}
+                      className={`text-xs py-1.5 px-3 flex items-center gap-1 ${
+                        goal.evidenceLinkVerificationStatus === 'VERIFIED'
+                          ? 'btn-success'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      }`}>
+                      <CheckCircle size={14} /> Approve
+                    </button>
+                    <button 
+                      onClick={onRejectCompletion}
+                      disabled={goal.evidenceLinkVerificationStatus !== 'REJECTED'}
+                      className={`text-xs py-1.5 px-3 flex items-center gap-1 ${
+                        goal.evidenceLinkVerificationStatus === 'REJECTED'
+                          ? 'btn-danger'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      }`}>
+                      <XCircle size={14} /> Reject
+                    </button>
+                    <button 
+                      onClick={onRequestEvidence}
+                      disabled={goal.evidenceLinkVerificationStatus !== 'NEEDS_ADDITIONAL_LINK'}
+                      className={`text-xs py-1.5 px-3 flex items-center gap-1 ${
+                        goal.evidenceLinkVerificationStatus === 'NEEDS_ADDITIONAL_LINK'
+                          ? 'btn-secondary'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                      }`}>
+                      <MessageSquare size={14} /> Request Evidence
+                    </button>
+                  </>
+                )}
               </>
             )}
           </>

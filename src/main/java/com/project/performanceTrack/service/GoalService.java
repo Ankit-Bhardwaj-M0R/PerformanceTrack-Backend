@@ -215,7 +215,7 @@ public class GoalService {
         goal.setCompletionNotes(req.getCompNotes());
         goal.setCompletionSubmittedDate(LocalDateTime.now());
         goal.setCompletionApprovalStatus(CompletionApprovalStatus.PENDING);
-        goal.setEvidenceLinkVerificationStatus(EvidenceVerificationStatus.NOT_VERIFIED);
+        goal.setEvidenceLinkVerificationStatus(null); // Manager will verify
         Goal updated = goalRepo.save(goal);
 
         // Notify manager
@@ -406,6 +406,19 @@ public class GoalService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        // Notify manager if employee deleted the goal
+        if (role.equals("EMPLOYEE")) {
+            notificationService.sendNotification(
+                    goal.getAssignedManager(),
+                    NotificationType.GOAL_CHANGE_REQUESTED,
+                    user.getName() + " deleted goal: " + goal.getTitle(),
+                    "Goal",
+                    goalId,
+                    "NORMAL",
+                    false
+            );
+        }
+
         createAuditLog(user, "GOAL_DELETED", "Deleted goal: " + goal.getTitle(), "Goal", goalId);
 
     }
@@ -421,7 +434,16 @@ public class GoalService {
         }
 
         // Update evidence verification status
-        EvidenceVerificationStatus evStatus = EvidenceVerificationStatus.valueOf(status.toUpperCase());
+        if (status == null || status.trim().isEmpty()) {
+            throw new BadRequestException("Verification status is required");
+        }
+        
+        EvidenceVerificationStatus evStatus;
+        try {
+            evStatus = EvidenceVerificationStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid verification status: " + status + ". Must be one of: VERIFIED, REJECTED, NEEDS_ADDITIONAL_LINK");
+        }
         goal.setEvidenceLinkVerificationStatus(evStatus);
         goal.setEvidenceLinkVerificationNotes(notes);
         User mgr = userRepo.findById(mgrId).orElse(null);
@@ -429,6 +451,26 @@ public class GoalService {
         goal.setEvidenceLinkVerifiedDate(LocalDateTime.now());
 
         Goal updated = goalRepo.save(goal);
+
+        // Notify employee about evidence verification
+        String notificationMessage;
+        if (evStatus == EvidenceVerificationStatus.VERIFIED) {
+            notificationMessage = "Your evidence for goal '" + goal.getTitle() + "' has been verified!";
+        } else if (evStatus == EvidenceVerificationStatus.REJECTED) {
+            notificationMessage = "Your evidence for goal '" + goal.getTitle() + "' has been rejected. Please review feedback.";
+        } else {
+            notificationMessage = "Additional evidence link needed for goal '" + goal.getTitle() + "'.";
+        }
+        
+        notificationService.sendNotification(
+                goal.getAssignedToUser(),
+                NotificationType.GOAL_CHANGE_REQUESTED,
+                notificationMessage,
+                "Goal",
+                goalId,
+                evStatus == EvidenceVerificationStatus.VERIFIED ? "NORMAL" : "HIGH",
+                evStatus != EvidenceVerificationStatus.VERIFIED
+        );
 
         // Audit log
         createAuditLog(mgr, "EVIDENCE_VERIFIED", "Verified evidence for goal: " + goal.getTitle() + " - Status: " + status, "Goal", goalId);
@@ -516,6 +558,17 @@ public class GoalService {
         User emp = userRepo.findById(empId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
+        // Notify manager about progress update
+        notificationService.sendNotification(
+                goal.getAssignedManager(),
+                NotificationType.GOAL_CHANGE_REQUESTED,
+                emp.getName() + " added a progress update for goal: " + goal.getTitle(),
+                "Goal",
+                goalId,
+                "NORMAL",
+                false
+        );
+
         createAuditLog(emp, "PROGRESS_ADDED", "Added progress update for goal: " + goal.getTitle(), "Goal", goalId);
     }
 
@@ -549,7 +602,7 @@ public class GoalService {
         
         // Reset to pending approval
         goal.setCompletionApprovalStatus(CompletionApprovalStatus.PENDING);
-        goal.setEvidenceLinkVerificationStatus(EvidenceVerificationStatus.NOT_VERIFIED);
+        goal.setEvidenceLinkVerificationStatus(null); // Manager will verify again
         goal.setEvidenceLinkVerificationNotes(null);
         
         Goal updated = goalRepo.save(goal);

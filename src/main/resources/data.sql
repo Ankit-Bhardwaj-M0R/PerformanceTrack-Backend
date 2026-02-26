@@ -301,7 +301,7 @@ VALUES (5, 4, 2, 'Mentor Junior Developers',
         'Meeting notes from all mentoring sessions, feedback from mentees, code review examples',
         'Accessible to @company.com domain',
         'Conducted 8 weekly mentoring sessions with Arjun and another junior developer. Covered topics including code reviews, design patterns, testing strategies, and career development. Both mentees report significant improvement in their skills.',
-        'NOT_VERIFIED', 'PENDING', '2026-02-18 11:45:00',
+        'REJECTED', 'PENDING', '2026-02-18 11:45:00',
         '2026-01-15 16:00:00: Conducted first mentoring session with Arjun - covered code review best practices\n2026-01-22 16:00:00: Second session - discussed design patterns\n2026-02-05 16:00:00: Weekly sessions ongoing, both mentees showing good progress',
         '2026-01-08 14:00:00', '2026-02-18 11:45:00');
 

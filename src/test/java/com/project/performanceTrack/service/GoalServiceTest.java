@@ -339,7 +339,7 @@ class GoalServiceTest {
         assertEquals(GoalStatus.PENDING_COMPLETION_APPROVAL, result.getStatus());
         assertEquals("https://github.com/project", result.getEvidenceLink());
         assertEquals(CompletionApprovalStatus.PENDING, result.getCompletionApprovalStatus());
-        assertEquals(EvidenceVerificationStatus.NOT_VERIFIED, result.getEvidenceLinkVerificationStatus());
+        assertNull(result.getEvidenceLinkVerificationStatus()); // Not verified yet
     }
 
     @Test

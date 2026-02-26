@@ -55,6 +55,8 @@ export default function TeamGoalsPage() {
   const [showEvidenceModal, setShowEvidenceModal] = useState(false)
   const [evidenceForm, setEvidenceForm] = useState({ verificationStatus: 'VERIFIED', notes: '' })
   const [submitting, setSubmitting]     = useState(false)
+  // Track the verification status selected per goal (goalId -> verificationStatus)
+  const [goalVerificationMap, setGoalVerificationMap] = useState({})
 
   // Load team members for employee name resolution
   useEffect(() => {
@@ -151,6 +153,8 @@ export default function TeamGoalsPage() {
     try {
       await goalService.verifyEvidence(selectedGoal.goalId, evidenceForm.verificationStatus, evidenceForm.notes)
       toast.success('Evidence verification submitted!')
+      // Remember which verification status was chosen for this goal
+      setGoalVerificationMap(prev => ({ ...prev, [selectedGoal.goalId]: evidenceForm.verificationStatus }))
       setShowEvidenceModal(false)
       loadGoals()
     } catch (err) {
@@ -248,12 +252,13 @@ export default function TeamGoalsPage() {
                     key={goal.goalId}
                     goal={goal}
                     employeeName={getEmployeeName(goal)}
+                    verificationStatus={goalVerificationMap[goal.goalId] || null}
                     onApprove={() => openAction(goal, 'APPROVE')}
                     onRequestChanges={() => openAction(goal, 'REQUEST_CHANGES')}
                     onApproveCompletion={() => openAction(goal, 'APPROVE_COMPLETION')}
                     onRejectCompletion={() => openAction(goal, 'REJECT_COMPLETION')}
                     onRequestEvidence={() => openAction(goal, 'REQUEST_EVIDENCE')}
-                    onVerifyEvidence={() => { setSelectedGoal(goal); setShowEvidenceModal(true) }}
+                    onVerifyEvidence={() => { setSelectedGoal(goal); setEvidenceForm({ verificationStatus: 'VERIFIED', notes: '' }); setShowEvidenceModal(true) }}
                   />
                 ))}
               </tbody>
@@ -314,7 +319,7 @@ export default function TeamGoalsPage() {
             <select className="input-field" value={evidenceForm.verificationStatus}
               onChange={e => setEvidenceForm({ ...evidenceForm, verificationStatus: e.target.value })}>
               <option value="VERIFIED">Verified — Evidence is acceptable</option>
-              <option value="NEEDS_REVISION">Needs Revision — More work needed</option>
+              <option value="NEEDS_ADDITIONAL_LINK">Needs Additional Link — More work needed</option>
               <option value="REJECTED">Rejected — Does not meet requirements</option>
             </select>
           </div>
@@ -336,8 +341,15 @@ export default function TeamGoalsPage() {
   )
 }
 
-function GoalRow({ goal, employeeName, onApprove, onRequestChanges, onApproveCompletion, onRejectCompletion, onRequestEvidence, onVerifyEvidence }) {
+function GoalRow({ goal, employeeName, verificationStatus, onApprove, onRequestChanges, onApproveCompletion, onRejectCompletion, onRequestEvidence, onVerifyEvidence }) {
   const priorityColors = { CRITICAL: 'text-red-600 font-bold', HIGH: 'text-orange-500', MEDIUM: 'text-yellow-600', LOW: 'text-green-600' }
+
+  // For PENDING_COMPLETION_APPROVAL: action buttons are enabled only after Verify,
+  // and only the button matching the selected verification status is active.
+  const canApproveCompletion  = verificationStatus === 'VERIFIED'
+  const canRejectCompletion   = verificationStatus === 'REJECTED'
+  const canRequestEvidence    = verificationStatus === 'NEEDS_ADDITIONAL_LINK'
+  const verifyDone            = !!verificationStatus
 
   return (
     <tr className="hover:bg-gray-50 transition-colors">
@@ -367,10 +379,54 @@ function GoalRow({ goal, employeeName, onApprove, onRequestChanges, onApproveCom
           )}
           {goal.status === 'PENDING_COMPLETION_APPROVAL' && (
             <>
-              {goal.evidenceLink && <button onClick={onVerifyEvidence} className="btn-primary text-xs py-1 px-2 flex items-center gap-1"><Eye size={12} /> Verify</button>}
-              <button onClick={onApproveCompletion} className="btn-success text-xs py-1 px-2 flex items-center gap-1"><CheckCircle size={12} /> Approve</button>
-              <button onClick={onRejectCompletion} className="btn-danger text-xs py-1 px-2 flex items-center gap-1"><XCircle size={12} /> Reject</button>
-              <button onClick={onRequestEvidence} className="btn-secondary text-xs py-1 px-2 flex items-center gap-1"><MessageSquare size={12} /> Evidence</button>
+              {/* Verify button — always enabled so manager can select/change the decision */}
+              <button
+                onClick={onVerifyEvidence}
+                className="btn-primary text-xs py-1 px-2 flex items-center gap-1"
+                title="Open verify evidence dialog to set your decision">
+                <Eye size={12} /> Verify
+              </button>
+
+              {/* Approve — enabled only when verification decision is VERIFIED */}
+              <button
+                onClick={onApproveCompletion}
+                disabled={!canApproveCompletion}
+                className={`text-xs py-1 px-2 flex items-center gap-1 rounded transition-colors
+                  ${canApproveCompletion
+                    ? 'btn-success cursor-pointer'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}`}
+                title={canApproveCompletion ? 'Approve completion' : 'Select \'Verified\' in Verify dialog to enable'}>
+                <CheckCircle size={12} /> Approve
+              </button>
+
+              {/* Reject — enabled only when verification decision is REJECTED */}
+              <button
+                onClick={onRejectCompletion}
+                disabled={!canRejectCompletion}
+                className={`text-xs py-1 px-2 flex items-center gap-1 rounded transition-colors
+                  ${canRejectCompletion
+                    ? 'btn-danger cursor-pointer'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}`}
+                title={canRejectCompletion ? 'Reject completion' : 'Select \'Rejected\' in Verify dialog to enable'}>
+                <XCircle size={12} /> Reject
+              </button>
+
+              {/* Request Evidence — enabled only when verification decision is NEEDS_ADDITIONAL_LINK */}
+              <button
+                onClick={onRequestEvidence}
+                disabled={!canRequestEvidence}
+                className={`text-xs py-1 px-2 flex items-center gap-1 rounded transition-colors
+                  ${canRequestEvidence
+                    ? 'btn-secondary cursor-pointer'
+                    : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'}`}
+                title={canRequestEvidence ? 'Request additional evidence' : 'Select \'Needs Additional Link\' in Verify dialog to enable'}>
+                <MessageSquare size={12} /> Evidence
+              </button>
+
+              {/* Hint shown until the manager has used Verify */}
+              {!verifyDone && (
+                <p className="w-full text-xs text-amber-600 mt-1">⚠ Use Verify to select a decision first</p>
+              )}
             </>
           )}
           {(goal.status === 'COMPLETED' || goal.status === 'IN_PROGRESS' || goal.status === 'REJECTED') && (

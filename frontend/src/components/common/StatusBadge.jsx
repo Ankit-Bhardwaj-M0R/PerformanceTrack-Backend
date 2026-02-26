@@ -31,7 +31,7 @@ const STATUS_COLORS = {
 
   // Evidence verification statuses
   VERIFIED: 'bg-green-100 text-green-800',
-  NEEDS_REVISION: 'bg-orange-100 text-orange-800',
+  NEEDS_ADDITIONAL_LINK: 'bg-orange-100 text-orange-800',
 
   // Review cycle statuses
   ACTIVE: 'bg-green-100 text-green-800',
