@@ -22,4 +22,7 @@ public interface PerformanceReviewRepository extends JpaRepository<PerformanceRe
     //find reviews by cycle and user
     Optional<PerformanceReview> findByCycle_CycleIdAndUser_UserId(Integer userId, Integer cycleId);
 
+    //find reviews by cycle and manager (manager's direct reports only)
+    List<PerformanceReview> findByCycle_CycleIdAndUser_Manager_UserId(Integer cycleId, Integer managerId);
+
 }

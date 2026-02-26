@@ -7,6 +7,7 @@ const DUMMY_USERS = [
   { role: 'EMPLOYEE', email: 'rahul@company.com',  password: 'employee123', color: 'bg-green-100 text-green-700 border-green-200', badge: 'Employee' },
   { role: 'MANAGER',  email: 'priya@company.com',  password: 'manager123',  color: 'bg-purple-100 text-purple-700 border-purple-200', badge: 'Manager' },
   { role: 'ADMIN',    email: 'admin@company.com',  password: 'admin123',    color: 'bg-red-100 text-red-700 border-red-200', badge: 'Admin' },
+  { role: 'EMPLOYEE', email: 'vikram@company.com',  password: 'vikram123', color: 'bg-green-100 text-green-700 border-green-200', badge: 'Employee' },
 ]
 
 export default function LoginPage() {

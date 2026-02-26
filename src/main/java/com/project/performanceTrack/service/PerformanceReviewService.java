@@ -38,6 +38,11 @@ public class PerformanceReviewService {
         return  reviewRepo.findByCycle_CycleId(cycleId);
     }
 
+    //get reviews by cycle and manager (only manager's team)
+    public List<PerformanceReview> getReviewsByCycleAndManager(Integer cycleId, Integer managerId){
+        return reviewRepo.findByCycle_CycleIdAndUser_Manager_UserId(cycleId, managerId);
+    }
+
     // get review by ID
     public PerformanceReview getReviewById(Integer reviewId) {
         return reviewRepo.findById(reviewId)

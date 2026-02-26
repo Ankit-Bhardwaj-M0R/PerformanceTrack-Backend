@@ -78,7 +78,7 @@ VALUES (5, 'Welcome to PerformanceTrack! Your account has been created. Your man
 -- Employee 3: Vikram Singh - QA Engineer (ID: 6)
 INSERT INTO users (user_id, name, email, password_hash, role, department, manager_id, status, created_date, last_modified_date)
 VALUES (6, 'Vikram Singh', 'vikram@company.com',
-        '$2a$12$99tF8GiIxfpak3KaFlY2BO0PHDHy5u8SwkAZZNSGMHi9GSVZ3Ox5e',
+        '$2a$12$8KG5LgCpSnqW6Szs2XdpoeFQ4iR4LpCx7WPIOBI6NvxNY302G4bke',
         'EMPLOYEE', 'Engineering', 2, 'ACTIVE', '2025-12-01 10:10:00', '2025-12-01 10:10:00');
 
 INSERT INTO audit_logs (user_id, action, details, related_entity_type, related_entity_id, timestamp)

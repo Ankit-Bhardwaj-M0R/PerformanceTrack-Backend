@@ -82,14 +82,17 @@ export default function ManagerReviewsPage() {
     setLoadingCycles(true)
     try {
       const data = await reviewCycleService.getAllCycles()
+      console.log('📅 Cycles API response:', data)
       const list = Array.isArray(data) ? data : (data?.content || [])
+      console.log('📅 Cycles list:', list)
       setCycles(list)
       // Auto-select: active cycle first, otherwise most recent
       const active = list.find(c => c.status === 'ACTIVE')
       const first  = list[0]
       const pick   = active || first
       if (pick) setSelectedCycleId(pick.cycleId)
-    } catch {
+    } catch (err) {
+      console.error('❌ Failed to load cycles:', err)
       // API failed — nothing to load
     } finally {
       setLoadingCycles(false)
@@ -110,12 +113,16 @@ export default function ManagerReviewsPage() {
     setLoading(true)
     try {
       // cycleId is required for manager to see team reviews
+      console.log('📊 Loading reviews for cycleId:', selectedCycleId)
       const data = await performanceReviewService.getReviews(0, 200, selectedCycleId)
+      console.log('📊 Reviews API response:', data)
       const list = Array.isArray(data) ? data : (data?.content || [])
+      console.log('📊 Reviews list:', list)
       setReviews(list)
       setTotalPages(data?.totalPages || 1)
       setTotalElements(data?.totalElements || list.length)
-    } catch {
+    } catch (err) {
+      console.error('❌ Failed to load reviews:', err)
       toast.error('Failed to load reviews')
     } finally {
       setLoading(false)
@@ -124,17 +131,16 @@ export default function ManagerReviewsPage() {
 
   const getEmployeeName = (review) => {
     if (!review) return '—'
-    const u = userMap[review.userId]
-    return u?.name || `User #${review.userId}`
+    // Backend now returns flat userName field
+    return review.userName || `User #${review.userId}`
   }
 
   const getCycleName = (review) =>
-    review.cycle?.title || (selectedCycleId ? `Cycle #${selectedCycleId}` : '—')
+    // Backend now returns flat cycleTitle field
+    review.cycleTitle || (selectedCycleId ? `Cycle #${selectedCycleId}` : '—')
 
-  // Client-side filter: only team members (if team loaded), then status + search
-  const hasTeam = Object.keys(userMap).length > 0
+  // Client-side filter: status + search only (backend already filters by manager's team)
   const filtered = reviews.filter(r => {
-    if (hasTeam && !userMap[r.userId]) return false
     const matchStatus = !statusFilter || r.status === statusFilter
     const empName = getEmployeeName(r)
     const matchSearch = !searchTerm ||
