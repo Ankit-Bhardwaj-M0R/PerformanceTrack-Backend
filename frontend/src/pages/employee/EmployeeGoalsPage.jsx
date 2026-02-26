@@ -646,7 +646,7 @@ export default function GoalsPage() {
             <select className="input-field" value={evidenceForm.verificationStatus}
               onChange={e => setEvidenceForm({ ...evidenceForm, verificationStatus: e.target.value })}>
               <option value="VERIFIED">Verified — Evidence is acceptable</option>
-              <option value="NEEDS_REVISION">Needs Revision — More work needed</option>
+              <option value="NEEDS_ADDITIONAL_LINK">Needs Additional Link — More work needed</option>
               <option value="REJECTED">Rejected — Evidence does not meet requirements</option>
             </select>
           </div>
@@ -840,6 +840,22 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
                 className="text-sm text-blue-600 hover:underline break-all">
                 {goal.evidenceLink}
               </a>
+              {goal.evidenceLinkVerificationStatus && (
+                <div className="mt-2">
+                  <span className={`text-xs px-2 py-1 rounded-full ${
+                    goal.evidenceLinkVerificationStatus === 'VERIFIED' ? 'bg-green-100 text-green-700' :
+                    goal.evidenceLinkVerificationStatus === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                    'bg-orange-100 text-orange-700'
+                  }`}>
+                    Evidence: {goal.evidenceLinkVerificationStatus.replace(/_/g, ' ')}
+                  </span>
+                </div>
+              )}
+              {goal.evidenceLinkVerificationNotes && (
+                <p className="text-xs text-gray-600 mt-2">
+                  <span className="font-medium">Verification Notes:</span> {goal.evidenceLinkVerificationNotes}
+                </p>
+              )}
             </div>
           )}
         </div>
