@@ -1,7 +1,7 @@
 package com.project.performanceTrack.entity;
 
+import com.project.performanceTrack.enums.FeedbackType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,8 +37,8 @@ public class Feedback {
     private String comments;
 
     @Column(name = "feedback_type", length = 50)
-    @Size(max = 50, message = "Please keep it within 50 characters")
-    private String feedbackType;
+    @Enumerated(EnumType.STRING)
+    private FeedbackType feedbackType;
 
     @Column(nullable = false)
     private LocalDateTime date;

@@ -2,6 +2,7 @@ package com.project.performanceTrack.service;
 import com.project.performanceTrack.dto.ManagerReviewRequest;
 import com.project.performanceTrack.dto.SelfAssessmentRequest;
 import com.project.performanceTrack.entity.*;
+import com.project.performanceTrack.enums.FeedbackType;
 import com.project.performanceTrack.enums.GoalStatus;
 import com.project.performanceTrack.enums.NotificationType;
 import com.project.performanceTrack.enums.PerformanceReviewStatus;
@@ -111,7 +112,7 @@ public class PerformanceReviewService {
         selfFb.setReview(saved);
         selfFb.setGivenByUser(emp);
         selfFb.setComments(req.getSelfAssmt());
-        selfFb.setFeedbackType("REVIEW_SELF_ASSESSMENT");
+        selfFb.setFeedbackType(FeedbackType.REVIEW_SELF_ASSESSMENT);
         selfFb.setDate(LocalDateTime.now());
         fbRepo.save(selfFb);
         return saved;
@@ -187,7 +188,7 @@ public class PerformanceReviewService {
         mgrFb.setReview(saved);
         mgrFb.setGivenByUser(mgr);
         mgrFb.setComments("Rating: " + req.getMgrRating() + " | Feedback: " + req.getMgrFb());
-        mgrFb.setFeedbackType("REVIEW_MANAGER_VERDICT");
+        mgrFb.setFeedbackType(FeedbackType.REVIEW_MANAGER_VERDICT);
         mgrFb.setDate(LocalDateTime.now());
         fbRepo.save(mgrFb);
 
@@ -232,7 +233,7 @@ public class PerformanceReviewService {
         ackFb.setReview(saved);
         ackFb.setGivenByUser(emp);
         ackFb.setComments(response);
-        ackFb.setFeedbackType("REVIEW_ACKNOWLEDGMENT");
+        ackFb.setFeedbackType(FeedbackType.REVIEW_ACKNOWLEDGMENT);
         ackFb.setDate(LocalDateTime.now());
         fbRepo.save(ackFb);
 

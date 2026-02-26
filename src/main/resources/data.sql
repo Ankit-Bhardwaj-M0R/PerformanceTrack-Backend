@@ -206,7 +206,7 @@ VALUES (1, 1, 'APPROVED', 2, '2026-02-25 16:30:00',
 INSERT INTO feedback (feedback_id, goal_id, review_id, given_by_user_id, comments, feedback_type, date)
 VALUES (1, 1, NULL, 2,
         'Outstanding work on the API optimization! Your systematic approach and thorough documentation set a great example for the team.',
-        'POSITIVE', '2026-02-25 16:35:00');
+        'GOAL_FINAL_APPROVE', '2026-02-25 16:35:00');
 
 INSERT INTO notifications (user_id, message, type, status, related_entity_type, related_entity_id, created_date)
 VALUES (4, 'You received feedback from Priya Patel on your goal "Reduce API Response Time by 30%".', 'GOAL_APPROVED', 'UNREAD', 'GOAL', 1, '2026-02-25 16:35:00');
@@ -258,7 +258,7 @@ VALUES
 INSERT INTO feedback (feedback_id, goal_id, review_id, given_by_user_id, comments, feedback_type, date)
 VALUES (2, 3, NULL, 2,
         'Please be more specific about what communication processes you want to improve and add measurable success criteria. For example: "Reduce Slack response time to under 2 hours" or "Conduct weekly team syncs with 90% attendance".',
-        'CONSTRUCTIVE', '2026-01-16 14:30:00');
+        'GOAL_FINAL_APPROVE', '2026-01-16 14:30:00');
 
 INSERT INTO notifications (user_id, message, type, status, created_date)
 VALUES
@@ -459,7 +459,7 @@ VALUES (4, 'CREATE', 'Linked Goal #1 to Performance Review #1', 'PERFORMANCE_REV
 INSERT INTO feedback (feedback_id, goal_id, review_id, given_by_user_id, comments, feedback_type, date)
 VALUES (3, NULL, 1, 2,
         'Your growth this quarter has been remarkable. Keep up the excellent work and I look forward to seeing you lead the microservices project!',
-        'POSITIVE', '2025-12-28 16:35:00');
+        'GOAL_FINAL_APPROVE', '2025-12-28 16:35:00');
 
 -- -------------------------
 -- SCENARIO 2: SELF_ASSESSMENT_COMPLETED (Anita - Q4 2025)
@@ -530,9 +530,9 @@ VALUES
 
 INSERT INTO feedback (feedback_id, goal_id, review_id, given_by_user_id, comments, feedback_type, date)
 VALUES
-(4, 2, NULL, 2, 'Great progress on the testing framework! Your CI/CD integration is particularly well done.', 'POSITIVE', '2026-02-06 14:00:00'),
-(5, 7, NULL, 3, 'The onboarding checklist you created is excellent. Very comprehensive and easy to follow.', 'POSITIVE', '2026-02-02 10:00:00'),
-(6, 8, NULL, 2, 'Good initiative on improving documentation skills. This will benefit the entire team.', 'POSITIVE', '2026-02-16 09:00:00');
+(4, 2, NULL, 2, 'Great progress on the testing framework! Your CI/CD integration is particularly well done.', 'GOAL_FINAL_APPROVE', '2026-02-06 14:00:00'),
+(5, 7, NULL, 3, 'The onboarding checklist you created is excellent. Very comprehensive and easy to follow.', 'GOAL_FINAL_APPROVE', '2026-02-02 10:00:00'),
+(6, 8, NULL, 2, 'Good initiative on improving documentation skills. This will benefit the entire team.', 'GOAL_FINAL_APPROVE', '2026-02-16 09:00:00');
 
 INSERT INTO notifications (user_id, message, type, status, related_entity_type, related_entity_id, created_date)
 VALUES

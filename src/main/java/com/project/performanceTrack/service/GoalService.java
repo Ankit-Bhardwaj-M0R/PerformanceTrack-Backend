@@ -171,7 +171,7 @@ public class GoalService {
         fb.setGoal(goal);
         fb.setGivenByUser(mgr);
         fb.setComments(comments);
-        fb.setFeedbackType("CHANGE_REQUEST");
+        fb.setFeedbackType(FeedbackType.GOAL_CHANGE_REQUEST);
         fb.setDate(LocalDateTime.now());
         fbRepo.save(fb);
 
@@ -261,6 +261,14 @@ public class GoalService {
         goal.setEvidenceLinkVerifiedBy(mgr);
         goal.setEvidenceLinkVerifiedDate(LocalDateTime.now());
         Goal updated = goalRepo.save(goal);
+
+        Feedback finalFeedback = new Feedback();
+        finalFeedback.setGoal(goal);
+        finalFeedback.setGivenByUser(mgr);
+        finalFeedback.setComments(req.getMgrComments());
+        finalFeedback.setFeedbackType(FeedbackType.GOAL_FINAL_APPROVE); // The final word
+        finalFeedback.setDate(LocalDateTime.now());
+        fbRepo.save(finalFeedback);
 
         // Create GoalCompletionApproval record
         GoalCompletionApproval approval = new GoalCompletionApproval();
@@ -456,6 +464,14 @@ public class GoalService {
         approval.setEvidenceLinkVerified(false);
         approval.setDecisionRationale("Goal completion rejected");
         approvalRepo.save(approval);
+
+        Feedback rejectFeedback = new Feedback();
+        rejectFeedback.setGoal(goal);
+        rejectFeedback.setGivenByUser(userRepo.findById(mgrId).get());
+        rejectFeedback.setComments(reason);
+        rejectFeedback.setFeedbackType(FeedbackType.GOAL_FINAL_REJECT);
+        rejectFeedback.setDate(LocalDateTime.now());
+        fbRepo.save(rejectFeedback);
 
         // Notify employee
         notificationService.sendNotification(
