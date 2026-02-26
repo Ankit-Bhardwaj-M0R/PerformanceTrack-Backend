@@ -11,6 +11,7 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Pagination from '../../components/common/Pagination'
 import { useAuth } from '../../context/AuthContext'
 import goalService from '../../services/goalService'
+import feedbackService from '../../services/feedbackService'
 import toast from 'react-hot-toast'
 
 // ─── GOALS PAGE ───────────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@ export default function GoalsPage() {
 
   // Modal visibility toggles
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditGoalModal, setShowEditGoalModal] = useState(false)
   const [showProgressModal, setShowProgressModal] = useState(false)
   const [showCompletionModal, setShowCompletionModal] = useState(false)
   const [showActionModal, setShowActionModal] = useState(false)  // for approve/reject
@@ -61,6 +63,7 @@ export default function GoalsPage() {
   const [showEditEvidenceModal, setShowEditEvidenceModal] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState(null)
   const [actionType, setActionType] = useState('')  // 'APPROVE' | 'REJECT' | 'REQUEST_CHANGES' | etc.
+  const [managerFeedback, setManagerFeedback] = useState([])
 
   // Form states
   const [goalForm, setGoalForm] = useState({
@@ -126,6 +129,28 @@ export default function GoalsPage() {
       loadGoals()
     } catch (err) {
       toast.error(err.response?.data?.msg || 'Failed to create goal')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // ─── EMPLOYEE: Update Goal (when changes requested) ───────────────────────
+  const handleUpdateGoal = async (e) => {
+    e.preventDefault()
+    if (!goalForm.title) {
+      toast.error('Title is required')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await goalService.updateGoal(selectedGoal.goalId, goalForm)
+      toast.success('Goal updated and resubmitted for approval!')
+      setShowEditGoalModal(false)
+      setGoalForm({ title: '', description: '', category: 'TECHNICAL', priority: 'MEDIUM', startDate: '', endDate: '', assignedManagerId: user?.managerId || '' })
+      setManagerFeedback([])
+      loadGoals()
+    } catch (err) {
+      toast.error(err.response?.data?.msg || 'Failed to update goal')
     } finally {
       setSubmitting(false)
     }
@@ -384,6 +409,26 @@ export default function GoalsPage() {
               isAdmin={isAdmin()}
               onAddProgress={() => { setSelectedGoal(goal); setShowProgressModal(true) }}
               onSubmitCompletion={() => { setSelectedGoal(goal); setShowCompletionModal(true) }}
+              onEditGoal={async () => {
+                setSelectedGoal(goal)
+                setGoalForm({
+                  title: goal.title || '',
+                  description: goal.description || '',
+                  category: goal.category || 'TECHNICAL',
+                  priority: goal.priority || 'MEDIUM',
+                  startDate: goal.startDate || '',
+                  endDate: goal.endDate || '',
+                  assignedManagerId: goal.assignedManagerId || user?.managerId || ''
+                })
+                // Fetch manager feedback
+                try {
+                  const feedbackData = await feedbackService.getFeedback(goal.goalId)
+                  setManagerFeedback(feedbackData?.data || [])
+                } catch (err) {
+                  setManagerFeedback([])
+                }
+                setShowEditGoalModal(true)
+              }}
               onEditEvidence={() => {
                 setSelectedGoal(goal)
                 setCompletionForm({
@@ -655,6 +700,70 @@ export default function GoalsPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Edit Goal Modal (Employee - when manager requests changes) */}
+      <Modal isOpen={showEditGoalModal} onClose={() => setShowEditGoalModal(false)} title="Edit & Resubmit Goal" size="lg">
+        <form onSubmit={handleUpdateGoal} className="space-y-4">
+          {managerFeedback.length > 0 && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 space-y-2">
+              <p className="text-xs font-medium text-orange-700 mb-1">Manager's Feedback:</p>
+              {managerFeedback.map((fb, idx) => (
+                <div key={idx} className="text-sm text-orange-800">
+                  <p className="font-medium">{fb.givenByUserName || 'Manager'}</p>
+                  <p>{fb.comments}</p>
+                  {fb.date && <p className="text-xs text-orange-600 mt-1">{new Date(fb.date).toLocaleDateString()}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+          <div>
+            <label className="form-label">Goal Title *</label>
+            <input className="input-field" value={goalForm.title}
+              onChange={e => setGoalForm({ ...goalForm, title: e.target.value })}
+              placeholder="e.g., Complete React certification" required />
+          </div>
+          <div>
+            <label className="form-label">Description</label>
+            <textarea className="input-field" rows={3} value={goalForm.description}
+              onChange={e => setGoalForm({ ...goalForm, description: e.target.value })}
+              placeholder="Detailed description of the goal..." />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="form-label">Category</label>
+              <select className="input-field" value={goalForm.category}
+                onChange={e => setGoalForm({ ...goalForm, category: e.target.value })}>
+                {GOAL_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="form-label">Priority</label>
+              <select className="input-field" value={goalForm.priority}
+                onChange={e => setGoalForm({ ...goalForm, priority: e.target.value })}>
+                {GOAL_PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="form-label">Start Date</label>
+              <input type="date" className="input-field" value={goalForm.startDate}
+                onChange={e => setGoalForm({ ...goalForm, startDate: e.target.value })} />
+            </div>
+            <div>
+              <label className="form-label">End Date</label>
+              <input type="date" className="input-field" value={goalForm.endDate}
+                onChange={e => setGoalForm({ ...goalForm, endDate: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setShowEditGoalModal(false)} className="btn-secondary flex-1">Cancel</button>
+            <button type="submit" disabled={submitting} className="btn-primary flex-1">
+              {submitting ? 'Updating...' : 'Update & Resubmit'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </Layout>
   )
 }
@@ -662,7 +771,7 @@ export default function GoalsPage() {
 // ─── GOAL CARD COMPONENT ─────────────────────────────────────────────────────
 // Renders a single goal with all available actions based on status + role
 function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
-  onSubmitCompletion, onEditEvidence, onApprove, onRequestChanges, onApproveCompletion,
+  onSubmitCompletion, onEditGoal, onEditEvidence, onApprove, onRequestChanges, onApproveCompletion,
   onRejectCompletion, onRequestEvidence, onVerifyEvidence, onDelete }) {
 
   const [expanded, setExpanded] = useState(false)
@@ -741,6 +850,12 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
         {/* ── EMPLOYEE ACTIONS ── */}
         {isEmployee && isMyGoal && (
           <>
+            {goal.status === 'PENDING' && goal.requestChanges && (
+              <button onClick={onEditGoal}
+                className="btn-primary text-xs py-1.5 px-3 flex items-center gap-1">
+                <Edit2 size={14} /> Edit Goal
+              </button>
+            )}
             {goal.status === 'IN_PROGRESS' && (
               <button onClick={onAddProgress}
                 className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1">
@@ -759,7 +874,7 @@ function GoalCard({ goal, user, isManager, isEmployee, isAdmin, onAddProgress,
                 <Edit2 size={14} /> Edit Evidence
               </button>
             )}
-            {(goal.status === 'PENDING') && (
+            {(goal.status === 'PENDING' && !goal.requestChanges) && (
               <button onClick={onDelete}
                 className="btn-danger text-xs py-1.5 px-3 flex items-center gap-1">
                 <Trash2 size={14} /> Delete
