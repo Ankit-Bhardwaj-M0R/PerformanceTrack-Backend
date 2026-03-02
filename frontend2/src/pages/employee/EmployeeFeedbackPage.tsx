@@ -5,6 +5,7 @@ import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import MetricChip from '../../components/common/MetricChip'
 import feedbackService from '../../services/feedbackService'
+import { getFeedbackCategory } from '../../utils/feedbackCategoryMapper'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
 import type { FeedbackResponseDTO } from '../../types'
@@ -16,6 +17,8 @@ interface TypeStyle {
   color: string
   label: string
 }
+
+type EnrichedFeedback = FeedbackResponseDTO & { feedbackCategory: string }
 
 const TYPE_STYLES: Record<string, TypeStyle> = {
   POSITIVE:     { bg: 'bg-green-50',  border: 'border-green-200',  icon: ThumbsUp, color: 'text-green-600',  label: 'Positive' },
@@ -34,7 +37,7 @@ function timeAgo(dateString?: string | null): string {
 }
 
 export default function EmployeeFeedbackPage(): JSX.Element {
-  const [feedbacks, setFeedbacks]   = useState<FeedbackResponseDTO[]>([])
+  const [feedbacks, setFeedbacks]   = useState<EnrichedFeedback[]>([])
   const [loading, setLoading]       = useState<boolean>(true)
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [typeFilter, setTypeFilter] = useState<string>('')
@@ -48,7 +51,12 @@ export default function EmployeeFeedbackPage(): JSX.Element {
       const list: FeedbackResponseDTO[] = Array.isArray(data)
         ? data
         : (data as { content?: FeedbackResponseDTO[] }).content ?? (data as FeedbackResponseDTO[]) ?? []
-      setFeedbacks(list)
+      // Map backend FeedbackType enums to frontend categories
+      const enriched: EnrichedFeedback[] = list.map(fb => ({
+        ...fb,
+        feedbackCategory: getFeedbackCategory(fb.feedbackType),
+      }))
+      setFeedbacks(enriched)
     } catch (err: unknown) {
       const axiosError = err as { response?: { status?: number } }
       if (axiosError.response?.status === 403) {
@@ -62,16 +70,16 @@ export default function EmployeeFeedbackPage(): JSX.Element {
   }
 
   const filtered = feedbacks.filter(fb => {
-    const matchType   = !typeFilter || fb.feedbackType === typeFilter
+    const matchType   = !typeFilter || fb.feedbackCategory === typeFilter
     const matchSearch = !searchTerm ||
       fb.comments?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fb.fromUserName?.toLowerCase().includes(searchTerm.toLowerCase())
     return matchType && matchSearch
   })
 
-  const positive     = feedbacks.filter(f => f.feedbackType === 'POSITIVE').length
-  const constructive = feedbacks.filter(f => f.feedbackType === 'CONSTRUCTIVE').length
-  const general      = feedbacks.filter(f => f.feedbackType === 'GENERAL').length
+  const positive     = feedbacks.filter(f => f.feedbackCategory === 'POSITIVE').length
+  const constructive = feedbacks.filter(f => f.feedbackCategory === 'CONSTRUCTIVE').length
+  const general      = feedbacks.filter(f => f.feedbackCategory === 'GENERAL').length
 
   return (
     <Layout title="My Feedback">
@@ -114,7 +122,7 @@ export default function EmployeeFeedbackPage(): JSX.Element {
       ) : (
         <div className="space-y-3">
           {filtered.map((fb, idx) => {
-            const style = getTypeStyle(fb.feedbackType)
+            const style = getTypeStyle(fb.feedbackCategory)
             const Icon  = style.icon
             return (
               <div

@@ -4,6 +4,7 @@ import Layout from '../../components/layout/Layout'
 import LoadingSpinner from '../../components/common/LoadingSpinner'
 import MetricChip from '../../components/common/MetricChip'
 import feedbackService from '../../services/feedbackService'
+import { getFeedbackCategory } from '../../utils/feedbackCategoryMapper'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -36,7 +37,12 @@ export default function EmployeeFeedbackPage() {
     try {
       const data = await feedbackService.getFeedback()
       const list = Array.isArray(data) ? data : data?.content || data || []
-      setFeedbacks(list)
+      // Map backend FeedbackType enums to frontend categories
+      const enriched = list.map(fb => ({
+        ...fb,
+        feedbackCategory: getFeedbackCategory(fb.feedbackType),
+      }))
+      setFeedbacks(enriched)
     } catch (err) {
       if (err.response?.status === 403) {
         // Some backends scope feedback to manager — just show empty state
@@ -50,16 +56,16 @@ export default function EmployeeFeedbackPage() {
   }
 
   const filtered = feedbacks.filter(fb => {
-    const matchType   = !typeFilter || fb.feedbackType === typeFilter
+    const matchType   = !typeFilter || fb.feedbackCategory === typeFilter
     const matchSearch = !searchTerm ||
       fb.comments?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       fb.fromUserName?.toLowerCase().includes(searchTerm.toLowerCase())
     return matchType && matchSearch
   })
 
-  const positive     = feedbacks.filter(f => f.feedbackType === 'POSITIVE').length
-  const constructive = feedbacks.filter(f => f.feedbackType === 'CONSTRUCTIVE').length
-  const general      = feedbacks.filter(f => f.feedbackType === 'GENERAL').length
+  const positive     = feedbacks.filter(f => f.feedbackCategory === 'POSITIVE').length
+  const constructive = feedbacks.filter(f => f.feedbackCategory === 'CONSTRUCTIVE').length
+  const general      = feedbacks.filter(f => f.feedbackCategory === 'GENERAL').length
 
   return (
     <Layout title="My Feedback">
@@ -102,7 +108,7 @@ export default function EmployeeFeedbackPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((fb, idx) => {
-            const style = getTypeStyle(fb.feedbackType)
+            const style = getTypeStyle(fb.feedbackCategory)
             const Icon  = style.icon
             return (
               <div
