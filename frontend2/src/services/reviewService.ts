@@ -124,11 +124,10 @@ export const performanceReviewService = {
    * Backend SelfAssessmentRequest fields: cycleId, selfAssmt, selfRating
    */
   submitSelfAssessment: async (
-    assessmentData: SelfAssessmentFormState,
-    cycleId?: number
+    assessmentData: SelfAssessmentFormState & { cycleId: number }
   ): Promise<PerformanceReviewResponseDTO> => {
     const payload: SelfAssessmentRequest = {
-      cycleId: cycleId ?? 0,
+      cycleId: assessmentData.cycleId,
       selfAssmt: assessmentData.selfAssessment,
       selfRating: assessmentData.employeeSelfRating,
     }
